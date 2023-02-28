@@ -3,6 +3,8 @@ from view import *
 BLUE = (0, 0, 100)
 RED = (100, 0, 0)
 YELLOW = (100, 100, 0)
+
+
 class Piece:
     def __init__(self, height, width, row_idx, col_idx, color, isObjective=False):
         self.id = -1
@@ -68,12 +70,12 @@ class Puzzle:
             return True
 
     def show_tui(self):
-        representation = [[[] for _ in range(self.numCols)] for _ in range(self.numRows+1)]
+        representation = [[[] for _ in range(self.numCols)] for _ in range(self.numRows + 1)]
         for piece in self.pieces:
             piece.show_tui(representation)
         for i in range(self.exit_x):
             representation[self.exit_y][i] = '-'
-        for i in range(self.exit_x+self.exit_width, self.numCols):
+        for i in range(self.exit_x + self.exit_width, self.numCols):
             representation[self.exit_y][i] = '-'
         print(representation)
 
@@ -86,24 +88,27 @@ class Puzzle:
         hSize = GAME_HEIGHT_SIZE / self.numRows
         for piece in self.pieces:
             pygame.draw.rect(screen, GAME_PART_COLOR, pygame.Rect(GAME_WIDTH_START + wSize * piece.col_idx,
-                                                              GAME_HEIGHT_START + hSize * piece.row_idx,
-                                                              wSize * piece.width,
-                                                              hSize * piece.height), border_radius=5)
-            pieceDraw = pygame.draw.rect(screen, piece.color, pygame.Rect(GAME_WIDTH_START + wSize * piece.col_idx + OFFSET,
-                                                              GAME_HEIGHT_START + hSize * piece.row_idx + OFFSET,
-                                                              wSize * piece.width - OFFSET * 2,
-                                                              hSize * piece.height - OFFSET * 2), border_radius=5)
+                                                                  GAME_HEIGHT_START + hSize * piece.row_idx,
+                                                                  wSize * piece.width,
+                                                                  hSize * piece.height), border_radius=5)
+            pieceDraw = pygame.draw.rect(screen, piece.color,
+                                         pygame.Rect(GAME_WIDTH_START + wSize * piece.col_idx + OFFSET,
+                                                     GAME_HEIGHT_START + hSize * piece.row_idx + OFFSET,
+                                                     wSize * piece.width - OFFSET * 2,
+                                                     hSize * piece.height - OFFSET * 2), border_radius=5)
             pieces.append(pieceDraw)
         return pieces
 
 
-
 def first_map():
-    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE), Piece(2, 1, 2, 1, BLUE), Piece(2, 2, 2, 2,RED, True), Piece(1, 1, 4, 0, YELLOW), Piece(1, 1, 4, 1, YELLOW), Piece(1, 1, 4, 2, YELLOW), Piece(1, 1, 4, 3, YELLOW)]
+    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
+              Piece(2, 1, 2, 1, BLUE), Piece(2, 2, 2, 2, RED, True), Piece(1, 1, 4, 0, YELLOW),
+              Piece(1, 1, 4, 1, YELLOW), Piece(1, 1, 4, 2, YELLOW), Piece(1, 1, 4, 3, YELLOW)]
 
     puzzle = Puzzle(5, 4, pieces)
 
     return puzzle
 
 
-first_map()
+if __name__ == '__main__':
+    first_map()
