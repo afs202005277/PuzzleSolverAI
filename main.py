@@ -1,31 +1,38 @@
 class Piece:
-    def __init__(self, height, width, x, y, isObjective=False):
+    def __init__(self, height, width, row_idx, col_idx, isObjective=False):
         self.id = -1
         self.height = height
         self.width = width
-        self.x = x
-        self.y = y
+        self.row_idx = row_idx
+        self.col_idx = col_idx
         self.isObjective = isObjective
 
     def get_occupied_positions(self):
-        return [(self.x + x, self.y + y) for y in range(self.height) for x in range(self.width)]
+        pos = []
+        for delta_row in range(self.row_idx, self.row_idx + self.height):
+            for delta_col in range(self.col_idx, self.col_idx + self.width):
+                pos.append((delta_col, delta_row))
+        return pos
 
     def show_tui(self, representation):
         positions = self.get_occupied_positions()
         for (x, y) in positions:
-            representation[x][y] = self.id
+            representation[y][x] = self.id
 
     def show_gui(self):
         print("TO BE DONE")
 
 
 class Puzzle:
-    def __init__(self, numRows, numCols, pieces=None):
+    def __init__(self, numRows, numCols, pieces=None, exit_x=1, exit_width=2):
         if pieces is None:
             pieces = []
         self.numRows = numRows
         self.numCols = numCols
         self.pieces = pieces
+        self.exit_x = exit_x
+        self.exit_y = numRows
+        self.exit_width = exit_width
         for idx, piece in enumerate(pieces):
             piece.id = idx
 
@@ -55,9 +62,13 @@ class Puzzle:
             return True
 
     def show_tui(self):
-        representation = [[[] for _ in range(self.numCols)] for _ in range(self.numRows)]
+        representation = [[[] for _ in range(self.numCols)] for _ in range(self.numRows+1)]
         for piece in self.pieces:
             piece.show_tui(representation)
+        for i in range(self.exit_x):
+            representation[self.exit_y][i] = '-'
+        for i in range(self.exit_x+self.exit_width, self.numCols):
+            representation[self.exit_y][i] = '-'
         print(representation)
 
     def show_gui(self):
@@ -65,14 +76,9 @@ class Puzzle:
 
 
 def first_map():
-    pieces = [Piece(2, 1, 0, 0), Piece(2, 1, 1, 0), Piece(2, 1, 3, 0), Piece(2, 1, 0, 2), Piece(2, 1, 1, 2),
-              Piece(2, 2, 2, 2, True), Piece(1, 1, 0, 4), Piece(1, 1, 1, 4), Piece(1, 1, 2, 4), Piece(1, 1, 3, 4)]
+    pieces = [Piece(2, 1, 0, 0), Piece(2, 1, 0, 1), Piece(2, 1, 0, 3), Piece(2, 1, 2, 0), Piece(2, 1, 2, 1), Piece(2, 2, 2, 2, True), Piece(1, 1, 4, 0), Piece(1, 1, 4, 1), Piece(1, 1, 4, 2), Piece(1, 1, 4, 3)]
 
-    puzzle = Puzzle(4, 5, pieces)
-
-    puzzle.show_tui()
-
-    puzzle.move_piece(2, 2, 0)
+    puzzle = Puzzle(5, 4, pieces)
 
     puzzle.show_tui()
 
