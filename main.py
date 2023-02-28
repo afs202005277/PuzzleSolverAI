@@ -1,4 +1,5 @@
 from view import *
+from copy import deepcopy
 
 BLUE = (0, 0, 100)
 RED = (100, 0, 0)
@@ -41,6 +42,8 @@ class Puzzle:
         self.exit_x = exit_x
         self.exit_y = numRows
         self.exit_width = exit_width
+        self.wSize = -1
+        self.hSize = -1
         for idx, piece in enumerate(pieces):
             piece.id = idx
 
@@ -49,18 +52,29 @@ class Puzzle:
         self.pieces.append(piece)
 
     def move_piece(self, index, newX, newY):
+        print(index, newX, newY)
         if self.is_valid_move(index, newX, newY):
-            self.pieces[index].x = newX
-            self.pieces[index].y = newY
+            self.pieces[index].col_idx = newX
+            self.pieces[index].row_idx = newY
+        print()
+
+    def move_piece_delta(self, index, delta_col, delta_row):
+        new_col_idx = round((self.pieces[index]).col_idx + delta_col)
+        new_row_idx = round((self.pieces[index]).row_idx + delta_row)
+        return self.move_piece(index, min(new_col_idx, self.numCols - self.pieces[index].width),
+                               min(new_row_idx, self.numRows - self.pieces[index].height))
 
     def is_valid_move(self, index, newX, newY):
         if index < 0 or index >= len(self.pieces):
             print("Invalid Piece")
             return False
+        elif newX >= self.numCols or newX < 0 or newY >= self.numRows or newY < 0:
+            print("Out of bounds")
+            return False
         else:
-            tmp_piece = self.pieces[index]
-            tmp_piece.x = newX
-            tmp_piece.y = newY
+            tmp_piece = deepcopy(self.pieces[index])
+            tmp_piece.col_idx = newX
+            tmp_piece.row_idx = newY
             occupied_positions = tmp_piece.get_occupied_positions()
             for piece in self.pieces:
                 if piece.id != tmp_piece.id and any(
@@ -84,18 +98,18 @@ class Puzzle:
 
     def drawPieces(self, screen):
         pieces = []
-        wSize = GAME_WIDTH_SIZE / self.numCols
-        hSize = GAME_HEIGHT_SIZE / self.numRows
+        self.wSize = GAME_WIDTH_SIZE / self.numCols
+        self.hSize = GAME_HEIGHT_SIZE / self.numRows
         for piece in self.pieces:
-            pygame.draw.rect(screen, GAME_PART_COLOR, pygame.Rect(GAME_WIDTH_START + wSize * piece.col_idx,
-                                                                  GAME_HEIGHT_START + hSize * piece.row_idx,
-                                                                  wSize * piece.width,
-                                                                  hSize * piece.height), border_radius=5)
+            pygame.draw.rect(screen, GAME_PART_COLOR, pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx,
+                                                                  GAME_HEIGHT_START + self.hSize * piece.row_idx,
+                                                                  self.wSize * piece.width,
+                                                                  self.hSize * piece.height), border_radius=5)
             pieceDraw = pygame.draw.rect(screen, piece.color,
-                                         pygame.Rect(GAME_WIDTH_START + wSize * piece.col_idx + OFFSET,
-                                                     GAME_HEIGHT_START + hSize * piece.row_idx + OFFSET,
-                                                     wSize * piece.width - OFFSET * 2,
-                                                     hSize * piece.height - OFFSET * 2), border_radius=5)
+                                         pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx + OFFSET,
+                                                     GAME_HEIGHT_START + self.hSize * piece.row_idx + OFFSET,
+                                                     self.wSize * piece.width - OFFSET * 2,
+                                                     self.hSize * piece.height - OFFSET * 2), border_radius=5)
             pieces.append(pieceDraw)
         return pieces
 

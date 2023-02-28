@@ -26,6 +26,9 @@ def isColliding(piece, pos):
 
 if __name__ == '__main__':
     screen = pygameInit()
+    start_pos = None
+    moving_piece_index = None
+    puzzle = main.first_map()
 
     # Game Loop (temporary)
     running = True
@@ -38,14 +41,23 @@ if __name__ == '__main__':
                     running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_LEFT:
-                    pos = pygame.mouse.get_pos()
-                    print([piece for piece in pieces if isColliding(piece, pos)])
+                    start_pos = pygame.mouse.get_pos()
+                    tmp = [idx for idx, piece in enumerate(pieces) if isColliding(piece, start_pos)]
+                    if len(tmp) == 1:
+                        print("clicked")
+                        moving_piece_index = tmp[0]
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == pygame.BUTTON_LEFT:
+                    print("unclicked")
+                    end_pos = pygame.mouse.get_pos()
+                    delta_col = (end_pos[0] - start_pos[0]) / puzzle.wSize
+                    delta_row = (end_pos[1] - start_pos[1]) / puzzle.hSize
+                    puzzle.move_piece_delta(moving_piece_index, delta_col, delta_row)
+                    start_pos = None
+                    moving_piece_index = None
 
         screen.fill(BG_COLOR)
         pygame.draw.rect(screen, GAME_PART_COLOR, pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE), border_radius=5)
-
-        puzzle = main.first_map()
-
         pieces = puzzle.drawPieces(screen)
         pygame.display.flip()
         pygame.display.update()
