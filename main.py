@@ -1,9 +1,11 @@
 from view import *
 from copy import deepcopy
+import math
 
-BLUE = (0, 0, 100)
-RED = (100, 0, 0)
-YELLOW = (100, 100, 0)
+BLUE = [0, 0, 120]
+RED = [120, 0, 0]
+YELLOW = [120, 120, 0]
+HIGHLIGHT = 70
 
 
 class Piece:
@@ -15,7 +17,16 @@ class Piece:
         self.col_idx = col_idx
         self.color = color
         self.isObjective = isObjective
+        self.isHighlighted = False
 
+
+    def toggleHighlight(self):
+        if self.isHighlighted:
+            self.color = [c - HIGHLIGHT for c in self.color]
+            self.isHighlighted = False
+        else:
+            self.color = [c + HIGHLIGHT for c in self.color]
+            self.isHighlighted = True
     def get_occupied_positions(self):
         pos = []
         for delta_row in range(self.row_idx, self.row_idx + self.height):
@@ -42,25 +53,54 @@ class Puzzle:
         self.exit_x = exit_x
         self.exit_y = numRows
         self.exit_width = exit_width
-        self.wSize = -1
-        self.hSize = -1
+        self.wSize = GAME_WIDTH_SIZE / self.numCols
+        self.hSize = GAME_HEIGHT_SIZE / self.numRows
+        self.pos_x_to_index = {}
+        self.pos_y_to_index = {}
+
         for idx, piece in enumerate(pieces):
             piece.id = idx
+
+        for col in range(numCols):
+            minPos = GAME_WIDTH_START + self.wSize * col
+            self.pos_x_to_index[f'{minPos}'] = col
+        self.pos_x_to_index[f'{GAME_WIDTH_START + GAME_WIDTH_SIZE}'] = numCols
+
+        for row in range(numRows):
+            minPos = GAME_HEIGHT_START + self.hSize * row
+            self.pos_y_to_index[f'{minPos}'] = row
+        self.pos_y_to_index[f'{GAME_HEIGHT_START + GAME_HEIGHT_SIZE}'] = numRows
+
+
+
+    def getColIndex(self, posX):
+        for x in self.pos_x_to_index:
+            if float(x) > posX:
+                return self.pos_x_to_index[x] - 1
+        return -1
+
+    def getRowIndex(self, posY):
+        for y in self.pos_y_to_index:
+            if float(y) > posY:
+                return self.pos_y_to_index[y] - 1
+        return -1
+
+    def getPiece(self, index):
+        return self.pieces[index]
+
 
     def add_piece(self, size, orientation, x, y):
         piece = Piece(size, orientation, x, y)
         self.pieces.append(piece)
 
     def move_piece(self, index, newX, newY):
-        print(index, newX, newY)
         if self.is_valid_move(index, newX, newY):
             self.pieces[index].col_idx = newX
             self.pieces[index].row_idx = newY
-        print()
 
     def move_piece_delta(self, index, delta_col, delta_row):
-        new_col_idx = round((self.pieces[index]).col_idx + delta_col)
-        new_row_idx = round((self.pieces[index]).row_idx + delta_row)
+        new_col_idx = (self.pieces[index]).col_idx + delta_col
+        new_row_idx = (self.pieces[index]).row_idx + delta_row
         return self.move_piece(index, min(new_col_idx, self.numCols - self.pieces[index].width),
                                min(new_row_idx, self.numRows - self.pieces[index].height))
 
@@ -98,8 +138,7 @@ class Puzzle:
 
     def drawPieces(self, screen):
         pieces = []
-        self.wSize = GAME_WIDTH_SIZE / self.numCols
-        self.hSize = GAME_HEIGHT_SIZE / self.numRows
+
         for piece in self.pieces:
             pygame.draw.rect(screen, GAME_PART_COLOR, pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx,
                                                                   GAME_HEIGHT_START + self.hSize * piece.row_idx,
