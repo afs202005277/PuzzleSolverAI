@@ -6,6 +6,7 @@ BLUE = [0, 0, 120]
 RED = [120, 0, 0]
 YELLOW = [120, 120, 0]
 HIGHLIGHT = 70
+ANIMATION_TIME = 80
 
 
 class Piece:
@@ -57,6 +58,8 @@ class Puzzle:
         self.hSize = GAME_HEIGHT_SIZE / self.numRows
         self.pos_x_to_index = {}
         self.pos_y_to_index = {}
+        self.animation = 0
+        self.movedPiece = None
 
         for idx, piece in enumerate(pieces):
             piece.id = idx
@@ -99,10 +102,22 @@ class Puzzle:
             self.pieces[index].row_idx = newY
 
     def move_piece_delta(self, index, delta_col, delta_row):
-        new_col_idx = (self.pieces[index]).col_idx + delta_col
-        new_row_idx = (self.pieces[index]).row_idx + delta_row
-        return self.move_piece(index, min(new_col_idx, self.numCols - self.pieces[index].width),
-                               min(new_row_idx, self.numRows - self.pieces[index].height))
+        new_col_idx = min((self.pieces[index]).col_idx + delta_col, self.numCols - self.pieces[index].width)
+        new_row_idx = min((self.pieces[index]).row_idx + delta_row, self.numRows - self.pieces[index].height)
+
+        if not self.is_valid_move(index, new_col_idx, new_row_idx):
+            return
+
+        if delta_col != 0 or delta_row != 0:
+            self.animation = ANIMATION_TIME
+            incrementX = (new_col_idx * self.wSize - self.pieces[index].col_idx * self.wSize) / ANIMATION_TIME
+            incrementY = (new_row_idx * self.hSize - self.pieces[index].row_idx * self.hSize) / ANIMATION_TIME
+            self.movedPiece = [index, self.pieces[index].col_idx * self.wSize, self.pieces[index].row_idx * self.hSize,
+                               incrementX, incrementY]
+
+        self.pieces[index].col_idx = new_col_idx
+        self.pieces[index].row_idx =  new_row_idx
+
 
     def is_valid_move(self, index, newX, newY):
         if index < 0 or index >= len(self.pieces):
@@ -144,7 +159,22 @@ class Puzzle:
                                                                   GAME_HEIGHT_START + self.hSize * piece.row_idx,
                                                                   self.wSize * piece.width,
                                                                   self.hSize * piece.height), border_radius=5)
-            pieceDraw = pygame.draw.rect(screen, piece.color,
+
+            if self.animation != 0 and piece.id == self.movedPiece[0]:
+                tmpCol = self.movedPiece[1]
+                tmpRow = self.movedPiece[2]
+
+                pieceDraw = pygame.draw.rect(screen, piece.color,
+                                             pygame.Rect(GAME_WIDTH_START + tmpCol + OFFSET,
+                                                         GAME_HEIGHT_START + tmpRow + OFFSET,
+                                                         self.wSize * piece.width - OFFSET * 2,
+                                                         self.hSize * piece.height - OFFSET * 2), border_radius=5)
+                self.movedPiece[1] += self.movedPiece[3]
+                self.movedPiece[2] += self.movedPiece[4]
+                self.animation -= 1
+
+            else:
+                pieceDraw = pygame.draw.rect(screen, piece.color,
                                          pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx + OFFSET,
                                                      GAME_HEIGHT_START + self.hSize * piece.row_idx + OFFSET,
                                                      self.wSize * piece.width - OFFSET * 2,
