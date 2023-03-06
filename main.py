@@ -2,31 +2,36 @@ from view import *
 from copy import deepcopy
 import math
 
-BLUE = [0, 0, 120]
+"""BLUE = [0, 0, 120]
 RED = [120, 0, 0]
-YELLOW = [120, 120, 0]
+YELLOW = [120, 120, 0]"""
 HIGHLIGHT = 70
-ANIMATION_TIME = 80
+ANIMATION_TIME = 10
 
+BLUE = "./assets/blue.png"
+RED = "./assets/objective_cube.png"
+YELLOW = "./assets/yellow.png"
+
+exit_image = pygame.image.load("./assets/exit.png")
 
 class Piece:
-    def __init__(self, height, width, row_idx, col_idx, color, isObjective=False):
+    def __init__(self, height, width, row_idx, col_idx, texture, isObjective=False):
         self.id = -1
         self.height = height
         self.width = width
         self.row_idx = row_idx
         self.col_idx = col_idx
-        self.color = color
+        self.texture = texture
+        self.color = (0, 0, 0, 0)
         self.isObjective = isObjective
         self.isHighlighted = False
 
-
     def toggleHighlight(self):
         if self.isHighlighted:
-            self.color = [c - HIGHLIGHT for c in self.color]
+            self.color = (0, 0, 0, 0)
             self.isHighlighted = False
         else:
-            self.color = [c + HIGHLIGHT for c in self.color]
+            self.color = (255, 255, 255, 255)
             self.isHighlighted = True
     def get_occupied_positions(self):
         pos = []
@@ -154,12 +159,35 @@ class Puzzle:
     def drawPieces(self, screen):
         pieces = []
 
+        piece_objective = ""
         for piece in self.pieces:
-            pygame.draw.rect(screen, GAME_PART_COLOR, pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx,
-                                                                  GAME_HEIGHT_START + self.hSize * piece.row_idx,
-                                                                  self.wSize * piece.width,
-                                                                  self.hSize * piece.height), border_radius=5)
+            if piece.isObjective:
+                piece_objective = piece
+                break
 
+
+        exit = pygame.draw.rect(screen, GAME_BACKGROUND_COLOR, pygame.Rect(GAME_WIDTH_START + self.wSize * self.exit_x,
+                                                                        GAME_HEIGHT_START + self.hSize * self.exit_y,
+                                                                           piece_objective.width * self.wSize, piece_objective.width * self.wSize * 0.438547486), 0)
+        exit_image_prepared = pygame.transform.scale(exit_image, (piece_objective.width * self.wSize, piece_objective.width * self.wSize * 0.438547486))
+        screen.blit(exit_image_prepared, exit)
+
+        pygame.draw.rect(screen, (255, 255, 255, 255), pygame.Rect(0, GAME_HEIGHT_START + self.hSize * self.exit_y + piece_objective.width * self.wSize * 0.10355866,
+                                                                    GAME_WIDTH_START + self.wSize * self.exit_x,
+                                                                    piece_objective.width * self.wSize * 0.08379888), 0)
+
+        pygame.draw.rect(screen, (255, 255, 255, 255), pygame.Rect(GAME_WIDTH_START + self.wSize * self.exit_x + piece_objective.width * self.wSize,
+                                                                   GAME_HEIGHT_START + self.hSize * self.exit_y + piece_objective.width * self.wSize * 0.10355866,
+                                                                   GAME_WIDTH_SIZE - GAME_WIDTH_START + self.wSize * self.exit_x - piece_objective.width * self.wSize,
+                                                                   piece_objective.width * self.wSize * 0.08379888), 0)
+
+        for piece in self.pieces:
+            pygame.draw.rect(screen, GAME_BACKGROUND_COLOR, pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx,
+                                                                        GAME_HEIGHT_START + self.hSize * piece.row_idx,
+                                                                        self.wSize * piece.width,
+                                                                        self.hSize * piece.height), border_radius=5)
+            texture_load = pygame.image.load(piece.texture)
+            texture_tmp = pygame.transform.scale(texture_load, (self.wSize * piece.width - OFFSET * 2, self.hSize * piece.height - OFFSET * 2))
             if self.animation != 0 and piece.id == self.movedPiece[0]:
                 tmpCol = self.movedPiece[1]
                 tmpRow = self.movedPiece[2]
@@ -168,7 +196,9 @@ class Puzzle:
                                              pygame.Rect(GAME_WIDTH_START + tmpCol + OFFSET,
                                                          GAME_HEIGHT_START + tmpRow + OFFSET,
                                                          self.wSize * piece.width - OFFSET * 2,
-                                                         self.hSize * piece.height - OFFSET * 2), border_radius=5)
+                                                         self.hSize * piece.height - OFFSET * 2), 0)
+
+                screen.blit(texture_tmp, pieceDraw)
                 self.movedPiece[1] += self.movedPiece[3]
                 self.movedPiece[2] += self.movedPiece[4]
                 self.animation -= 1
@@ -179,6 +209,7 @@ class Puzzle:
                                                      GAME_HEIGHT_START + self.hSize * piece.row_idx + OFFSET,
                                                      self.wSize * piece.width - OFFSET * 2,
                                                      self.hSize * piece.height - OFFSET * 2), border_radius=5)
+                screen.blit(texture_tmp, pieceDraw)
             pieces.append(pieceDraw)
         return pieces
 

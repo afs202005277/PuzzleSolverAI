@@ -10,8 +10,8 @@ GAME_WIDTH_SIZE = 450
 GAME_HEIGHT_SIZE = 640
 OFFSET = 10
 
-BG_COLOR = (2, 2, 20)
-GAME_PART_COLOR = (200, 200, 200)
+BG_COLOR = (0, 51, 68)
+GAME_BACKGROUND_COLOR = (20, 58, 75)
 
 
 def pygameInit():
@@ -78,7 +78,7 @@ if __name__ == '__main__':
             lastRow += deltaRow
 
         screen.fill(BG_COLOR)
-        pygame.draw.rect(screen, GAME_PART_COLOR, pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE), border_radius=5)
+        pygame.draw.rect(screen, GAME_BACKGROUND_COLOR, pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE), border_radius=5)
         pieces = puzzle.drawPieces(screen)
         pygame.display.flip()
         pygame.display.update()
