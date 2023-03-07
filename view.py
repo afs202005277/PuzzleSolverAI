@@ -1,11 +1,12 @@
 import pygame
 import main
+import time
 
 SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 800
+SCREEN_HEIGHT = 840
 
 GAME_WIDTH_START = 80
-GAME_HEIGHT_START = 40
+GAME_HEIGHT_START = 80
 GAME_WIDTH_SIZE = 450
 GAME_HEIGHT_SIZE = 640
 OFFSET = 10
@@ -17,7 +18,7 @@ GAME_BACKGROUND_COLOR = (20, 58, 75)
 def pygameInit():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Let the RED pass")
+    pygame.display.set_caption("Block Escape")
     return screen
 
 def isColliding(piece, pos):
@@ -37,6 +38,43 @@ def draw_start_menu(screen):
     screen.blit(quit_button,
                 (SCREEN_WIDTH / 2 - quit_button.get_width() / 2, SCREEN_HEIGHT*0.70 + quit_button.get_height() / 2))
     pygame.display.update()
+
+def draw_end_screen(screen, puzzle):
+    screen.fill(BG_COLOR)
+    pygame.draw.rect(screen, GAME_BACKGROUND_COLOR,
+                     pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE),
+                     border_radius=5)
+    puzzle.drawPieces(screen)
+
+    end_screen = pygame.Surface((SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20), pygame.SRCALPHA)
+    end_screen.fill((0, 0, 0, 150))
+    screen.blit(end_screen, (10, 10))
+    font = pygame.font.SysFont('poppins', 40)
+    font.set_bold(600)
+    game_over_info = font.render('YOU WIN!', True, (255, 255, 255))
+    screen.blit(game_over_info,
+                (SCREEN_WIDTH / 2 - game_over_info.get_width() / 2,
+                 50))
+    score = font.render(f'MOVES MADE: {puzzle.getMoves()}', True, (255, 255, 255))
+    screen.blit(score,
+                (SCREEN_WIDTH / 2 - score.get_width() / 2,
+                 100))
+    main_menu_button = font.render('PRESS "M" TO RETURN TO THE MENU', True, (255, 255, 255))
+    screen.blit(main_menu_button,
+                (SCREEN_WIDTH / 2 - main_menu_button.get_width() / 2,
+                 SCREEN_HEIGHT * 0.4 + main_menu_button.get_height() / 2))
+    quit_button = font.render('PRESS ESCAPE TO QUIT', True, (255, 255, 255))
+    screen.blit(quit_button,
+                (SCREEN_WIDTH / 2 - quit_button.get_width() / 2,
+                 SCREEN_HEIGHT * 0.70 + quit_button.get_height() / 2))
+    pygame.display.flip()
+    pygame.display.update()
+
+def draw_moves(screen, moves):
+    font = pygame.font.SysFont('poppins', 40)
+    moves = font.render(F'MOVES: {moves}', True, (255, 255, 255))
+    screen.blit(moves,
+                (SCREEN_WIDTH / 2 - moves.get_width() / 2, 20))
 
 
 if __name__ == '__main__':
@@ -88,10 +126,10 @@ if __name__ == '__main__':
                         newRow = puzzle.getRowIndex(end_pos[1])
                         puzzle.move_piece_delta(moving_piece_index, newCol - lastCol, newRow - lastRow)
                         puzzle.getPiece(moving_piece_index).toggleHighlight()
-                        #delta_col = (end_pos[0] - start_pos[0]) / puzzle.wSize
-                        #delta_row = (end_pos[1] - start_pos[1]) / puzzle.hSize
-                        #puzzle.move_piece_delta(moving_piece_index, delta_col, delta_row)
                         start_pos = None
+                        if puzzle.gameOver():
+                            puzzle.move_piece_delta(moving_piece_index, 0, 3)
+                            game_state = "end_screen"
                         moving_piece_index = None
 
                 if moving_piece_index is not None:
@@ -101,7 +139,6 @@ if __name__ == '__main__':
                     newRow = puzzle.getRowIndex(current_pos[1])
                     deltaCol = newCol - lastCol
                     deltaRow = newRow - lastRow
-
                     puzzle.move_piece_delta(moving_piece_index, deltaCol, deltaRow)
                     lastCol += deltaCol
                     lastRow += deltaRow
@@ -109,6 +146,20 @@ if __name__ == '__main__':
                 screen.fill(BG_COLOR)
                 pygame.draw.rect(screen, GAME_BACKGROUND_COLOR, pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE), border_radius=5)
                 pieces = puzzle.drawPieces(screen)
+                draw_moves(screen, puzzle.getMoves())
                 pygame.display.flip()
                 pygame.display.update()
+            elif game_state == 'end_screen':
+                draw_end_screen(screen, puzzle)
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_m]:
+                    game_state = 'main_menu'
+                    lastCol = None
+                    lastRow = None
+                    moving_piece_index = None
+                    puzzle = main.first_map()
+                    game_over = False
+
+
+
 
