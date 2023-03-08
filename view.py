@@ -21,23 +21,47 @@ def pygameInit():
     pygame.display.set_caption("Block Escape")
     return screen
 
+
 def isColliding(piece, pos):
     return piece.collidepoint(pos[0], pos[1])
 
+
 def draw_start_menu(screen):
-    screen.fill(tuple(map(lambda x: x*1.7, BG_COLOR)))
+    screen.fill(tuple(map(lambda x: x * 1.7, BG_COLOR)))
     font = pygame.font.SysFont('poppins', 40)
     font.set_bold(600)
     gl = pygame.image.load("./assets/logo.png").convert_alpha()
-    game_logo = pygame.transform.scale(gl, (SCREEN_WIDTH*0.8, SCREEN_WIDTH*0.2792862684*0.8))
-    screen.blit(game_logo, (SCREEN_WIDTH/2*0.2, SCREEN_HEIGHT*0.1))
+    game_logo = pygame.transform.scale(gl, (SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.2792862684 * 0.8))
+    screen.blit(game_logo, (SCREEN_WIDTH / 2 * 0.2, SCREEN_HEIGHT * 0.1))
     start_button = font.render('PRESS SPACE TO START', True, (255, 255, 255))
     screen.blit(start_button,
-                (SCREEN_WIDTH/2 - start_button.get_width()/2, SCREEN_HEIGHT*0.55 + start_button.get_height()/2))
+                (SCREEN_WIDTH / 2 - start_button.get_width() / 2, SCREEN_HEIGHT * 0.55 + start_button.get_height() / 2))
     quit_button = font.render('PRESS ESCAPE TO QUIT', True, (255, 255, 255))
     screen.blit(quit_button,
-                (SCREEN_WIDTH / 2 - quit_button.get_width() / 2, SCREEN_HEIGHT*0.70 + quit_button.get_height() / 2))
+                (SCREEN_WIDTH / 2 - quit_button.get_width() / 2, SCREEN_HEIGHT * 0.70 + quit_button.get_height() / 2))
     pygame.display.update()
+
+
+def draw_difficulties(screen):
+    screen.fill(BG_COLOR)
+    font = pygame.font.SysFont('poppins', 40)
+    font.set_bold(600)
+    title = font.render('CHOOSE AN OPTION', True, (255, 255, 255))
+    easy = font.render('1: EASY', True, (255, 255, 255))
+    medium = font.render('2: MEDIUM', True, (255, 255, 255))
+    hard = font.render('3: HARD', True, (255, 255, 255))
+
+    screen.blit(title,
+                (SCREEN_WIDTH / 2 - title.get_width() / 2, SCREEN_HEIGHT * 0.15 + title.get_height() / 2))
+    screen.blit(easy,
+                (SCREEN_WIDTH / 2 - easy.get_width() / 2, SCREEN_HEIGHT * 0.25 + easy.get_height() / 2))
+    screen.blit(medium,
+                (SCREEN_WIDTH / 2 - medium.get_width() / 2, SCREEN_HEIGHT * 0.35 + medium.get_height() / 2))
+    screen.blit(hard,
+                (SCREEN_WIDTH / 2 - hard.get_width() / 2, SCREEN_HEIGHT * 0.45 + hard.get_height() / 2))
+
+    pygame.display.update()
+
 
 def draw_end_screen(screen, puzzle):
     screen.fill(BG_COLOR)
@@ -70,6 +94,7 @@ def draw_end_screen(screen, puzzle):
     pygame.display.flip()
     pygame.display.update()
 
+
 def draw_moves(screen, moves):
     font = pygame.font.SysFont('poppins', 40)
     moves = font.render(F'MOVES: {moves}', True, (255, 255, 255))
@@ -100,11 +125,19 @@ if __name__ == '__main__':
 
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_SPACE]:
-                    game_state = 'playing' # mudar isto para 'choose_diff' quando feito
+                    game_state = 'choose_diff'
                     game_over = False
 
-            if game_state == 'choose_diff': # parte do andre
-                pass
+            if game_state == 'choose_diff':
+                draw_difficulties(screen)
+
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_1]:
+                    game_state = 'playing'
+                elif keys[pygame.K_2]:
+                    game_state = 'playing'
+                elif keys[pygame.K_3]:
+                    game_state = 'playing'
 
             elif game_state == 'playing':
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -144,7 +177,9 @@ if __name__ == '__main__':
                     lastRow += deltaRow
 
                 screen.fill(BG_COLOR)
-                pygame.draw.rect(screen, GAME_BACKGROUND_COLOR, pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE), border_radius=5)
+                pygame.draw.rect(screen, GAME_BACKGROUND_COLOR,
+                                 pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE),
+                                 border_radius=5)
                 pieces = puzzle.drawPieces(screen)
                 draw_moves(screen, puzzle.getMoves())
                 pygame.display.flip()
@@ -159,7 +194,3 @@ if __name__ == '__main__':
                     moving_piece_index = None
                     puzzle = main.first_map()
                     game_over = False
-
-
-
-
