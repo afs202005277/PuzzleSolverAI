@@ -65,9 +65,14 @@ class Puzzle:
         self.pos_y_to_index = {}
         self.animation = 0
         self.movedPiece = None
+        self.objectivePiece = None
+        self.isGameOver = False
+        self.moves = 0
 
         for idx, piece in enumerate(pieces):
             piece.id = idx
+            if piece.isObjective:
+                self.objectivePiece = piece
 
         for col in range(numCols):
             minPos = GAME_WIDTH_START + self.wSize * col
@@ -80,6 +85,13 @@ class Puzzle:
         self.pos_y_to_index[f'{GAME_HEIGHT_START + GAME_HEIGHT_SIZE}'] = numRows
 
 
+    def getMoves(self):
+        return self.moves
+    def gameOver(self):
+        heightRule = self.objectivePiece.row_idx == self.numRows - self.objectivePiece.height
+        widthRule = self.objectivePiece.col_idx >= self.exit_x and self.objectivePiece.col_idx + self.objectivePiece.width <= self.exit_x + self.exit_width
+        self.isGameOver = self.objectivePiece is not None and heightRule and widthRule
+        return self.isGameOver
 
     def getColIndex(self, posX):
         for x in self.pos_x_to_index:
@@ -96,7 +108,6 @@ class Puzzle:
     def getPiece(self, index):
         return self.pieces[index]
 
-
     def add_piece(self, size, orientation, x, y):
         piece = Piece(size, orientation, x, y)
         self.pieces.append(piece)
@@ -110,8 +121,11 @@ class Puzzle:
         new_col_idx = min((self.pieces[index]).col_idx + delta_col, self.numCols - self.pieces[index].width)
         new_row_idx = min((self.pieces[index]).row_idx + delta_row, self.numRows - self.pieces[index].height)
 
-        if not self.is_valid_move(index, new_col_idx, new_row_idx):
+        if not self.isGameOver and not self.is_valid_move(index, new_col_idx, new_row_idx):
             return
+
+        if self.isGameOver:
+            new_row_idx = (self.pieces[index]).row_idx + delta_row
 
         if delta_col != 0 or delta_row != 0:
             self.animation = ANIMATION_TIME
@@ -120,8 +134,10 @@ class Puzzle:
             self.movedPiece = [index, self.pieces[index].col_idx * self.wSize, self.pieces[index].row_idx * self.hSize,
                                incrementX, incrementY]
 
+        if not self.isGameOver and (self.pieces[index].col_idx != new_col_idx or self.pieces[index].row_idx != new_row_idx):
+            self.moves += 1
         self.pieces[index].col_idx = new_col_idx
-        self.pieces[index].row_idx =  new_row_idx
+        self.pieces[index].row_idx = new_row_idx
 
 
     def is_valid_move(self, index, newX, newY):
