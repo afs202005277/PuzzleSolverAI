@@ -176,7 +176,7 @@ class Puzzle:
             representation[self.exit_y][i] = '-'
         for i in range(self.exit_x + self.exit_width, self.numCols):
             representation[self.exit_y][i] = '-'
-        print(representation)
+        return representation
 
     def show_gui(self):
         print("TO BE DONE")
@@ -274,12 +274,39 @@ def medium_map():
     return puzzle
 
 
-if __name__ == '__main__':
-    easy_map()
-
-
 # distance red block to exit
 def h1(puzzle):
     vector = (puzzle.get_objective_piece().col_idx - puzzle.exit_x,
               puzzle.get_objective_piece().row_idx - (puzzle.exit_x + puzzle.exit_width))
     return math.sqrt(vector[0] * vector[0] + vector[1] * vector[1])
+
+
+def h3(puzzle):
+    matrix = puzzle.show_tui()
+    rows, cols = len(matrix), len(matrix[0])
+
+    def dfs(row, col):
+        if row < 0 or row >= rows-1 or col < 0 or col >= cols-1:
+            return 0
+
+        if matrix[row][col] != []:
+            return 0
+
+        size = 1 + dfs(row+1, col) + dfs(row, col+1)
+
+        return size
+
+    max = 0
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            tmp = dfs(i, j)
+            if max < tmp:
+                max = tmp
+
+    return max
+
+
+if __name__ == '__main__':
+
+print(representation)
+    print(largest_contiguous_free_space(representation))
