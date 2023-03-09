@@ -107,7 +107,7 @@ if __name__ == '__main__':
     lastCol = None
     lastRow = None
     moving_piece_index = None
-    puzzle = main.first_map()
+    puzzle = main.medium_map()
     game_state = 'main_menu'
 
     # Game Loop (temporary)
@@ -132,11 +132,15 @@ if __name__ == '__main__':
                 draw_difficulties(screen)
 
                 keys = pygame.key.get_pressed()
+                # Change when more levels are implemented
                 if keys[pygame.K_1]:
                     game_state = 'playing'
+                    puzzle = main.easy_map()
                 elif keys[pygame.K_2]:
+                    puzzle = main.medium_map()
                     game_state = 'playing'
                 elif keys[pygame.K_3]:
+                    puzzle = main.hard_map()
                     game_state = 'playing'
 
             elif game_state == 'playing':
@@ -193,5 +197,5 @@ if __name__ == '__main__':
                     lastCol = None
                     lastRow = None
                     moving_piece_index = None
-                    puzzle = main.first_map()
+                    puzzle = main.easy_map()
                     game_over = False
