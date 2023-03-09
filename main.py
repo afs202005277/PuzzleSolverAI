@@ -153,7 +153,8 @@ class Puzzle:
         if index < 0 or index >= len(self.pieces):
             print("Invalid Piece")
             return False
-        elif newX + self.pieces[index].width > self.numCols or newX < 0 or newY + self.pieces[index].height > self.numRows or newY < 0:
+        elif newX + self.pieces[index].width > self.numCols or newX < 0 or newY + self.pieces[
+            index].height > self.numRows or newY < 0:
             print("Out of bounds")
             return False
         else:
@@ -290,13 +291,13 @@ def h3(puzzle):
     rows, cols = len(matrix), len(matrix[0])
 
     def dfs(row, col):
-        if row < 0 or row >= rows-1 or col < 0 or col >= cols-1:
+        if row < 0 or row >= rows - 1 or col < 0 or col >= cols - 1:
             return 0
 
         if matrix[row][col]:
             return 0
 
-        size = 1 + dfs(row+1, col) + dfs(row, col+1)
+        size = 1 + dfs(row + 1, col) + dfs(row, col + 1)
 
         return size
 
@@ -308,6 +309,7 @@ def h3(puzzle):
                 max = tmp
 
     return max
+
 
 def h2(puzzle):
     # weighted sum of the number of obstacles between the red block and the exit
@@ -349,3 +351,7 @@ def h5(puzzle):
             print((x, y))
             weight += 1
     return weight
+
+
+def h7(puzzle, index):
+    return puzzle.pieces[index].width * puzzle.pieces[index].height
