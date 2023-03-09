@@ -293,7 +293,7 @@ def h3(puzzle):
         if row < 0 or row >= rows-1 or col < 0 or col >= cols-1:
             return 0
 
-        if matrix[row][col] != []:
+        if matrix[row][col]:
             return 0
 
         size = 1 + dfs(row+1, col) + dfs(row, col+1)
@@ -308,12 +308,6 @@ def h3(puzzle):
                 max = tmp
 
     return max
-
-
-if __name__ == '__main__':
-
-print(representation)
-    print(largest_contiguous_free_space(representation))
 
 def h2(puzzle):
     # weighted sum of the number of obstacles between the red block and the exit
