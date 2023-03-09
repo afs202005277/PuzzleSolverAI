@@ -108,6 +108,11 @@ class Puzzle:
                 return self.pos_y_to_index[y] - 1
         return -1
 
+    def get_objective_piece(self):
+        for piece in self.pieces:
+            if piece.isObjective:
+                return piece
+
     def getPiece(self, index):
         return self.pieces[index]
 
@@ -140,6 +145,7 @@ class Puzzle:
         if not self.isGameOver and (
                 self.pieces[index].col_idx != new_col_idx or self.pieces[index].row_idx != new_row_idx):
             self.moves += 1
+        print(h1(self))
         self.pieces[index].col_idx = new_col_idx
         self.pieces[index].row_idx = new_row_idx
 
@@ -257,6 +263,7 @@ def hard_map():
 
     return puzzle
 
+
 def medium_map():
     pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(1, 1, 0, 3, YELLOW), Piece(1, 1, 0, 2, YELLOW),
               Piece(2, 2, 2, 0, RED, True), Piece(2, 1, 1, 2, BLUE), Piece(2, 1, 1, 3, BLUE),
@@ -266,5 +273,13 @@ def medium_map():
 
     return puzzle
 
+
 if __name__ == '__main__':
     easy_map()
+
+
+# distance red block to exit
+def h1(puzzle):
+    vector = (puzzle.get_objective_piece().col_idx - puzzle.exit_x,
+              puzzle.get_objective_piece().row_idx - (puzzle.exit_x + puzzle.exit_width))
+    return math.sqrt(vector[0] * vector[0] + vector[1] * vector[1])
