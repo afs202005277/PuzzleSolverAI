@@ -11,8 +11,10 @@ ANIMATION_TIME = 10
 BLUE = "./assets/blue.png"
 RED = "./assets/objective_cube.png"
 YELLOW = "./assets/yellow.png"
+GREEN = "./assets/green.png"
 
 exit_image = pygame.image.load("./assets/exit.png")
+
 
 class Piece:
     def __init__(self, height, width, row_idx, col_idx, texture, isObjective=False):
@@ -33,6 +35,7 @@ class Piece:
         else:
             self.color = (255, 255, 255, 255)
             self.isHighlighted = True
+
     def get_occupied_positions(self):
         pos = []
         for delta_row in range(self.row_idx, self.row_idx + self.height):
@@ -84,9 +87,9 @@ class Puzzle:
             self.pos_y_to_index[f'{minPos}'] = row
         self.pos_y_to_index[f'{GAME_HEIGHT_START + GAME_HEIGHT_SIZE}'] = numRows
 
-
     def getMoves(self):
         return self.moves
+
     def gameOver(self):
         heightRule = self.objectivePiece.row_idx == self.numRows - self.objectivePiece.height
         widthRule = self.objectivePiece.col_idx >= self.exit_x and self.objectivePiece.col_idx + self.objectivePiece.width <= self.exit_x + self.exit_width
@@ -134,11 +137,11 @@ class Puzzle:
             self.movedPiece = [index, self.pieces[index].col_idx * self.wSize, self.pieces[index].row_idx * self.hSize,
                                incrementX, incrementY]
 
-        if not self.isGameOver and (self.pieces[index].col_idx != new_col_idx or self.pieces[index].row_idx != new_row_idx):
+        if not self.isGameOver and (
+                self.pieces[index].col_idx != new_col_idx or self.pieces[index].row_idx != new_row_idx):
             self.moves += 1
         self.pieces[index].col_idx = new_col_idx
         self.pieces[index].row_idx = new_row_idx
-
 
     def is_valid_move(self, index, newX, newY):
         if index < 0 or index >= len(self.pieces):
@@ -181,21 +184,25 @@ class Puzzle:
                 piece_objective = piece
                 break
 
-
         exit = pygame.draw.rect(screen, GAME_BACKGROUND_COLOR, pygame.Rect(GAME_WIDTH_START + self.wSize * self.exit_x,
-                                                                        GAME_HEIGHT_START + self.hSize * self.exit_y,
-                                                                           piece_objective.width * self.wSize, piece_objective.width * self.wSize * 0.438547486), 0)
-        exit_image_prepared = pygame.transform.scale(exit_image, (piece_objective.width * self.wSize, piece_objective.width * self.wSize * 0.438547486))
+                                                                           GAME_HEIGHT_START + self.hSize * self.exit_y,
+                                                                           piece_objective.width * self.wSize,
+                                                                           piece_objective.width * self.wSize * 0.438547486),
+                                0)
+        exit_image_prepared = pygame.transform.scale(exit_image, (
+            piece_objective.width * self.wSize, piece_objective.width * self.wSize * 0.438547486))
         screen.blit(exit_image_prepared, exit)
 
-        pygame.draw.rect(screen, (255, 255, 255, 255), pygame.Rect(0, GAME_HEIGHT_START + self.hSize * self.exit_y + piece_objective.width * self.wSize * 0.10355866,
-                                                                    GAME_WIDTH_START + self.wSize * self.exit_x,
-                                                                    piece_objective.width * self.wSize * 0.08379888), 0)
-
-        pygame.draw.rect(screen, (255, 255, 255, 255), pygame.Rect(GAME_WIDTH_START + self.wSize * self.exit_x + piece_objective.width * self.wSize,
+        pygame.draw.rect(screen, (255, 255, 255, 255), pygame.Rect(0,
                                                                    GAME_HEIGHT_START + self.hSize * self.exit_y + piece_objective.width * self.wSize * 0.10355866,
-                                                                   GAME_WIDTH_SIZE - GAME_WIDTH_START + self.wSize * self.exit_x - piece_objective.width * self.wSize,
+                                                                   GAME_WIDTH_START + self.wSize * self.exit_x,
                                                                    piece_objective.width * self.wSize * 0.08379888), 0)
+
+        pygame.draw.rect(screen, (255, 255, 255, 255),
+                         pygame.Rect(GAME_WIDTH_START + self.wSize * self.exit_x + piece_objective.width * self.wSize,
+                                     GAME_HEIGHT_START + self.hSize * self.exit_y + piece_objective.width * self.wSize * 0.10355866,
+                                     GAME_WIDTH_SIZE - GAME_WIDTH_START + self.wSize * self.exit_x - piece_objective.width * self.wSize,
+                                     piece_objective.width * self.wSize * 0.08379888), 0)
 
         for piece in self.pieces:
             pygame.draw.rect(screen, GAME_BACKGROUND_COLOR, pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx,
@@ -203,7 +210,8 @@ class Puzzle:
                                                                         self.wSize * piece.width,
                                                                         self.hSize * piece.height), border_radius=5)
             texture_load = pygame.image.load(piece.texture)
-            texture_tmp = pygame.transform.scale(texture_load, (self.wSize * piece.width - OFFSET * 2, self.hSize * piece.height - OFFSET * 2))
+            texture_tmp = pygame.transform.scale(texture_load, (
+                self.wSize * piece.width - OFFSET * 2, self.hSize * piece.height - OFFSET * 2))
             if self.animation != 0 and piece.id == self.movedPiece[0]:
                 tmpCol = self.movedPiece[1]
                 tmpRow = self.movedPiece[2]
@@ -221,16 +229,16 @@ class Puzzle:
 
             else:
                 pieceDraw = pygame.draw.rect(screen, piece.color,
-                                         pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx + OFFSET,
-                                                     GAME_HEIGHT_START + self.hSize * piece.row_idx + OFFSET,
-                                                     self.wSize * piece.width - OFFSET * 2,
-                                                     self.hSize * piece.height - OFFSET * 2), border_radius=5)
+                                             pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx + OFFSET,
+                                                         GAME_HEIGHT_START + self.hSize * piece.row_idx + OFFSET,
+                                                         self.wSize * piece.width - OFFSET * 2,
+                                                         self.hSize * piece.height - OFFSET * 2), border_radius=5)
                 screen.blit(texture_tmp, pieceDraw)
             pieces.append(pieceDraw)
         return pieces
 
 
-def first_map():
+def easy_map():
     pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
               Piece(2, 1, 2, 1, BLUE), Piece(2, 2, 2, 2, RED, True), Piece(1, 1, 4, 0, YELLOW),
               Piece(1, 1, 4, 1, YELLOW), Piece(1, 1, 4, 2, YELLOW), Piece(1, 1, 4, 3, YELLOW)]
@@ -240,5 +248,23 @@ def first_map():
     return puzzle
 
 
+def hard_map():
+    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 2, 0, 1, RED, True), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
+              Piece(1, 1, 2, 1, YELLOW), Piece(1, 1, 3, 1, YELLOW), Piece(1, 1, 3, 2, YELLOW),
+              Piece(1, 1, 2, 2, YELLOW), Piece(2, 1, 2, 3, BLUE), Piece(1, 2, 4, 1, GREEN)]
+
+    puzzle = Puzzle(5, 4, pieces)
+
+    return puzzle
+
+def medium_map():
+    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(1, 1, 0, 3, YELLOW), Piece(1, 1, 0, 2, YELLOW),
+              Piece(2, 2, 2, 0, RED, True), Piece(2, 1, 1, 2, BLUE), Piece(2, 1, 1, 3, BLUE),
+              Piece(2, 1, 3, 2, BLUE), Piece(1, 1, 3, 3, YELLOW), Piece(1, 1, 4, 1, YELLOW)]
+
+    puzzle = Puzzle(5, 4, pieces)
+
+    return puzzle
+
 if __name__ == '__main__':
-    first_map()
+    easy_map()
