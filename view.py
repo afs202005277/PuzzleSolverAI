@@ -144,7 +144,7 @@ if __name__ == '__main__':
                     game_state = 'playing'
 
             elif game_state == 'playing':
-                print(main.h2(puzzle))
+                print(main.h5(puzzle))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == pygame.BUTTON_LEFT:
                         start_pos = pygame.mouse.get_pos()

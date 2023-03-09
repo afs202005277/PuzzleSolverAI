@@ -145,15 +145,14 @@ class Puzzle:
         if not self.isGameOver and (
                 self.pieces[index].col_idx != new_col_idx or self.pieces[index].row_idx != new_row_idx):
             self.moves += 1
-        print(h2(self))
         self.pieces[index].col_idx = new_col_idx
         self.pieces[index].row_idx = new_row_idx
 
     def is_valid_move(self, index, newX, newY):
-        if index < 0 or index >= len(self.pieces):
+        if index < 0 or index > len(self.pieces):
             print("Invalid Piece")
             return False
-        elif newX >= self.numCols or newX < 0 or newY >= self.numRows or newY < 0:
+        elif newX + self.pieces[index].width > self.numCols or newX < 0 or newY + self.pieces[index].height > self.numRows or newY < 0:
             print("Out of bounds")
             return False
         else:
@@ -300,6 +299,28 @@ def h2(puzzle):
     for piece in puzzle.pieces:
         if not piece.isObjective:
             if (piece.col_idx, piece.row_idx) in path:
-                weight += (piece.width*2 * piece.height)
+                weight += (piece.width ** 2) * piece.height
 
+    return weight
+
+
+def h4(puzzle):
+    return max(puzzle.get_objective_piece().col_idx,
+               puzzle.numCols - puzzle.get_objective_piece().width - puzzle.get_objective_piece().col_idx) * 100
+
+
+def h5(puzzle):
+    index = 0
+    for i, piece in enumerate(puzzle.pieces):
+        if piece.isObjective:
+            index = i
+            break
+    vectors = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+
+    weight = 0
+    for (x, y) in vectors:
+        if puzzle.is_valid_move(index, puzzle.pieces[index].col_idx + x, puzzle.pieces[index].row_idx + y):
+            print(index, puzzle.pieces[index].col_idx + x, puzzle.pieces[index].row_idx + y)
+            print((x, y))
+            weight += 1
     return weight
