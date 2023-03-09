@@ -223,6 +223,25 @@ def first_map():
 
     return puzzle
 
-
 if __name__ == '__main__':
     first_map()
+
+
+def h2(puzzle):
+    # weighted sum of the number of obstacles between the red block and the exit
+    path = []
+
+    weight = 0
+    for piece in puzzle.pieces:
+        if piece.isObjective:
+            for i in range(piece.width):
+                for j in range(puzzle.numRows - piece.row_idx):
+                    path.append((piece.col_idx + i, piece.row_idx + j))
+            break
+
+    for piece in puzzle.pieces:
+        if not piece.isObjective:
+            if (piece.col_idx, piece.row_idx) in path:
+                weight += (piece.width*2 * piece.height)
+
+    return weight

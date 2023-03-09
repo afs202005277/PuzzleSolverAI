@@ -69,6 +69,7 @@ if __name__ == '__main__':
                 pass
 
             elif game_state == 'playing':
+                print(main.h2(puzzle))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == pygame.BUTTON_LEFT:
                         start_pos = pygame.mouse.get_pos()
