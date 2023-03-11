@@ -22,6 +22,7 @@ def breadth_first_search(initial_state, goal_state_func, operators_func):
 
     while queue:
         node = queue.popleft()  # get first element in the queue
+        # print(node.state.show_tui())
         if goal_state_func(node.state):  # check goal state
             return node
 
@@ -38,7 +39,7 @@ def breadth_first_search(initial_state, goal_state_func, operators_func):
 def print_solution(node):
     if node is not None:
         print_solution(node.parent)
-        print(node.state)
+        print(node.state.show_tui())
 
 
 def depth_first_search(initial_state, goal_state_func, operators_func):

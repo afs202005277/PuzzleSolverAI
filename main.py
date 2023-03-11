@@ -1,6 +1,7 @@
 from view import *
 from copy import deepcopy
 import math
+import search_algorithms
 
 """BLUE = [0, 0, 120]
 RED = [120, 0, 0]
@@ -28,7 +29,7 @@ class Piece:
         self.isObjective = isObjective
         self.isHighlighted = False
 
-    def toggleHighlight(self):
+    def toggle_highlight(self):
         if self.isHighlighted:
             self.color = (0, 0, 0, 0)
             self.isHighlighted = False
@@ -78,23 +79,17 @@ class Puzzle:
                 self.objectivePiece = piece
 
         for col in range(numCols):
-            minPos = GAME_WIDTH_START + self.wSize * col
-            self.pos_x_to_index[f'{minPos}'] = col
+            min_pos = GAME_WIDTH_START + self.wSize * col
+            self.pos_x_to_index[f'{min_pos}'] = col
         self.pos_x_to_index[f'{GAME_WIDTH_START + GAME_WIDTH_SIZE}'] = numCols
 
         for row in range(numRows):
-            minPos = GAME_HEIGHT_START + self.hSize * row
-            self.pos_y_to_index[f'{minPos}'] = row
+            min_pos = GAME_HEIGHT_START + self.hSize * row
+            self.pos_y_to_index[f'{min_pos}'] = row
         self.pos_y_to_index[f'{GAME_HEIGHT_START + GAME_HEIGHT_SIZE}'] = numRows
 
     def getMoves(self):
         return self.moves
-
-    def gameOver(self):
-        heightRule = self.objectivePiece.row_idx == self.numRows - self.objectivePiece.height
-        widthRule = self.objectivePiece.col_idx >= self.exit_x and self.objectivePiece.col_idx + self.objectivePiece.width <= self.exit_x + self.exit_width
-        self.isGameOver = self.objectivePiece is not None and heightRule and widthRule
-        return self.isGameOver
 
     def getColIndex(self, posX):
         for x in self.pos_x_to_index:
@@ -151,11 +146,11 @@ class Puzzle:
 
     def is_valid_move(self, index, newX, newY):
         if index < 0 or index >= len(self.pieces):
-            print("Invalid Piece")
+            # print("Invalid Piece")
             return False
         elif newX + self.pieces[index].width > self.numCols or newX < 0 or newY + self.pieces[
             index].height > self.numRows or newY < 0:
-            print("Out of bounds")
+            # print("Out of bounds")
             return False
         else:
             tmp_piece = deepcopy(self.pieces[index])
@@ -165,7 +160,7 @@ class Puzzle:
             for piece in self.pieces:
                 if piece.id != tmp_piece.id and any(
                         map(lambda x: x in occupied_positions, piece.get_occupied_positions())):
-                    print("Invalid position")
+                    # print("Invalid position")
                     return False
             return True
 
@@ -372,8 +367,13 @@ def get_child_states(puzzle):
     return res
 
 
+def gameOver(puzzle):
+    heightRule = puzzle.objectivePiece.row_idx == puzzle.numRows - puzzle.objectivePiece.height
+    widthRule = puzzle.objectivePiece.col_idx >= puzzle.exit_x and puzzle.objectivePiece.col_idx + puzzle.objectivePiece.width <= puzzle.exit_x + puzzle.exit_width
+    puzzle.isGameOver = puzzle.objectivePiece is not None and heightRule and widthRule
+    return puzzle.isGameOver
+
+
 if __name__ == '__main__':
     puzzle = easy_map()
-    children = get_child_states(puzzle)
-    for child in children:
-        print(child.show_tui())
+    search_algorithms.print_solution(search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states))

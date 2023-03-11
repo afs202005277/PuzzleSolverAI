@@ -1,6 +1,5 @@
 import pygame
 import main
-import time
 
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 840
@@ -15,21 +14,21 @@ BG_COLOR = (0, 51, 68)
 GAME_BACKGROUND_COLOR = (20, 58, 75)
 
 
-def pygameInit():
+def pygame_init():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Block Escape")
     return screen
 
 
-def isColliding(piece, pos):
+def is_colliding(piece, pos):
     return piece.collidepoint(pos[0], pos[1])
 
 
 def draw_start_menu(screen):
     screen.fill(tuple(map(lambda x: x * 1.7, BG_COLOR)))
     font = pygame.font.SysFont('poppins', 40)
-    font.set_bold(600)
+    font.set_bold(True)
     gl = pygame.image.load("./assets/logo.png").convert_alpha()
     game_logo = pygame.transform.scale(gl, (SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.2792862684 * 0.8))
     screen.blit(game_logo, (SCREEN_WIDTH / 2 * 0.2, SCREEN_HEIGHT * 0.1))
@@ -45,7 +44,7 @@ def draw_start_menu(screen):
 def draw_difficulties(screen):
     screen.fill(BG_COLOR)
     font = pygame.font.SysFont('poppins', 40)
-    font.set_bold(600)
+    font.set_bold(True)
     title = font.render('CHOOSE AN OPTION', True, (255, 255, 255))
     easy = font.render('1: EASY', True, (255, 255, 255))
     medium = font.render('2: MEDIUM', True, (255, 255, 255))
@@ -74,7 +73,7 @@ def draw_end_screen(screen, puzzle):
     end_screen.fill((0, 0, 0, 150))
     screen.blit(end_screen, (10, 10))
     font = pygame.font.SysFont('poppins', 40)
-    font.set_bold(600)
+    font.set_bold(True)
     game_over_info = font.render('YOU WIN!', True, (255, 255, 255))
     screen.blit(game_over_info,
                 (SCREEN_WIDTH / 2 - game_over_info.get_width() / 2,
@@ -102,10 +101,10 @@ def draw_moves(screen, moves):
                 (SCREEN_WIDTH / 2 - moves.get_width() / 2, 20))
 
 
-if __name__ == '__main__':
-    screen = pygameInit()
-    lastCol = None
-    lastRow = None
+def main_loop():
+    screen = pygame_init()
+    last_col = None
+    last_row = None
     moving_piece_index = None
     puzzle = main.medium_map()
     game_state = 'main_menu'
@@ -148,24 +147,24 @@ if __name__ == '__main__':
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == pygame.BUTTON_LEFT:
                         start_pos = pygame.mouse.get_pos()
-                        lastCol = puzzle.getColIndex(start_pos[0])
-                        lastRow = puzzle.getRowIndex(start_pos[1])
-                        tmp = [idx for idx, piece in enumerate(pieces) if isColliding(piece, start_pos)]
+                        last_col = puzzle.getColIndex(start_pos[0])
+                        last_row = puzzle.getRowIndex(start_pos[1])
+                        tmp = [idx for idx, piece in enumerate(pieces) if is_colliding(piece, start_pos)]
                         if len(tmp) == 1:
                             moving_piece_index = tmp[0]
-                            puzzle.getPiece(moving_piece_index).toggleHighlight()
+                            puzzle.getPiece(moving_piece_index).toggle_highlight()
                 elif event.type == pygame.MOUSEBUTTONUP:
                     if event.button == pygame.BUTTON_LEFT:
                         if moving_piece_index is None:
                             continue
                         end_pos = pygame.mouse.get_pos()
 
-                        newCol = puzzle.getColIndex(end_pos[0])
-                        newRow = puzzle.getRowIndex(end_pos[1])
-                        puzzle.move_piece_delta(moving_piece_index, newCol - lastCol, newRow - lastRow)
-                        puzzle.getPiece(moving_piece_index).toggleHighlight()
+                        new_col = puzzle.getColIndex(end_pos[0])
+                        new_row = puzzle.getRowIndex(end_pos[1])
+                        puzzle.move_piece_delta(moving_piece_index, new_col - last_col, new_row - last_row)
+                        puzzle.getPiece(moving_piece_index).toggle_highlight()
                         start_pos = None
-                        if puzzle.gameOver():
+                        if main.gameOver(puzzle):
                             puzzle.move_piece_delta(moving_piece_index, 0, 3)
                             game_state = "end_screen"
                         moving_piece_index = None
@@ -173,13 +172,13 @@ if __name__ == '__main__':
                 if moving_piece_index is not None:
                     current_pos = pygame.mouse.get_pos()
 
-                    newCol = puzzle.getColIndex(current_pos[0])
-                    newRow = puzzle.getRowIndex(current_pos[1])
-                    deltaCol = newCol - lastCol
-                    deltaRow = newRow - lastRow
-                    puzzle.move_piece_delta(moving_piece_index, deltaCol, deltaRow)
-                    lastCol += deltaCol
-                    lastRow += deltaRow
+                    new_col = puzzle.getColIndex(current_pos[0])
+                    new_row = puzzle.getRowIndex(current_pos[1])
+                    delta_col = new_col - last_col
+                    delta_row = new_row - last_row
+                    puzzle.move_piece_delta(moving_piece_index, delta_col, delta_row)
+                    last_col += delta_col
+                    last_row += delta_row
 
                 screen.fill(BG_COLOR)
                 pygame.draw.rect(screen, GAME_BACKGROUND_COLOR,
@@ -194,8 +193,12 @@ if __name__ == '__main__':
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_m]:
                     game_state = 'main_menu'
-                    lastCol = None
-                    lastRow = None
+                    last_col = None
+                    last_row = None
                     moving_piece_index = None
                     puzzle = main.easy_map()
                     game_over = False
+
+
+if __name__ == '__main__':
+    main_loop()
