@@ -145,7 +145,7 @@ class Puzzle:
         if not self.isGameOver and (
                 self.pieces[index].col_idx != new_col_idx or self.pieces[index].row_idx != new_row_idx):
             self.moves += 1
-        print(h1(self))
+
         self.pieces[index].col_idx = new_col_idx
         self.pieces[index].row_idx = new_row_idx
 
@@ -275,10 +275,6 @@ def medium_map():
     return puzzle
 
 
-if __name__ == '__main__':
-    easy_map()
-
-
 # distance red block to exit
 def h1(puzzle):
     vector = (puzzle.get_objective_piece().col_idx - puzzle.exit_x,
@@ -347,11 +343,37 @@ def h5(puzzle):
     weight = 0
     for (x, y) in vectors:
         if puzzle.is_valid_move(index, puzzle.pieces[index].col_idx + x, puzzle.pieces[index].row_idx + y):
-            print(index, puzzle.pieces[index].col_idx + x, puzzle.pieces[index].row_idx + y)
-            print((x, y))
             weight += 1
     return weight
 
 
 def h7(puzzle, index):
     return puzzle.pieces[index].width * puzzle.pieces[index].height
+
+
+def move_piece_ai(puzzle, index, newX, newY):
+    if puzzle.is_valid_move(index, newX, newY):
+        res = deepcopy(puzzle)
+        res.pieces[index].col_idx = newX
+        res.pieces[index].row_idx = newY
+        res.moves += 1
+        return res
+    return None
+
+
+def get_child_states(puzzle):
+    vectors = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    res = []
+    for i, piece in enumerate(puzzle.pieces):
+        for (x, y) in vectors:
+            new_puzzle = move_piece_ai(puzzle, i, piece.col_idx + x, piece.row_idx + y)
+            if new_puzzle:
+                res.append(new_puzzle)
+    return res
+
+
+if __name__ == '__main__':
+    puzzle = easy_map()
+    children = get_child_states(puzzle)
+    for child in children:
+        print(child.show_tui())
