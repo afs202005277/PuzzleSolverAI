@@ -42,6 +42,14 @@ def print_solution(node):
         print(node.state.show_tui())
 
 
+def get_solution_path(node):
+    res = []
+    if node is not None:
+        res += get_solution_path(node.parent)
+        res.append(node.state)
+    return res
+
+
 def depth_first_search(initial_state, goal_state_func, operators_func):
     root = TreeNode(initial_state)  # create the root node in the search tree
     queue = [root]  # initialize the queue to store the nodes

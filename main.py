@@ -376,4 +376,10 @@ def gameOver(puzzle):
 
 if __name__ == '__main__':
     puzzle = easy_map()
-    search_algorithms.print_solution(search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states))
+    # solution = search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states)
+    print("s1")
+    # full_path = search_algorithms.get_solution_path(solution)
+    print("s2")
+    full_path = [easy_map(), medium_map(), hard_map()]
+    show_ai_path(full_path)
+    print("s3")

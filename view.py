@@ -1,3 +1,5 @@
+from time import sleep
+
 import pygame
 import main
 
@@ -143,7 +145,6 @@ def main_loop():
                     game_state = 'playing'
 
             elif game_state == 'playing':
-                print(main.h5(puzzle))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == pygame.BUTTON_LEFT:
                         start_pos = pygame.mouse.get_pos()
@@ -198,6 +199,19 @@ def main_loop():
                     moving_piece_index = None
                     puzzle = main.easy_map()
                     game_over = False
+
+
+def show_ai_path(path):
+    screen = pygame_init()
+    for step in path:
+        screen.fill(BG_COLOR)
+        pygame.draw.rect(screen, GAME_BACKGROUND_COLOR,
+                         pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE),
+                         border_radius=5)
+        step.drawPieces(screen)
+        pygame.display.flip()
+        pygame.display.update()
+        sleep(3)
 
 
 if __name__ == '__main__':
