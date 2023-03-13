@@ -29,6 +29,16 @@ class Piece:
         self.isObjective = isObjective
         self.isHighlighted = False
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            statement = self.row_idx == other.row_idx and self.col_idx == other.col_idx \
+                        and self.width == other.width and self.height == other.height
+            return statement
+        return False
+
+    def __hash__(self):
+        return hash((self.row_idx, self.col_idx, self.width, self.height))
+
     def toggle_highlight(self):
         if self.isHighlighted:
             self.color = (0, 0, 0, 0)
@@ -87,6 +97,17 @@ class Puzzle:
             min_pos = GAME_HEIGHT_START + self.hSize * row
             self.pos_y_to_index[f'{min_pos}'] = row
         self.pos_y_to_index[f'{GAME_HEIGHT_START + GAME_HEIGHT_SIZE}'] = numRows
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__) and len(self.pieces) == len(other.pieces):
+            for i in range(len(self.pieces)):
+                if self.pieces[i] != other.pieces[i]:
+                    return False
+            return True
+        return False
+
+    def __hash__(self):
+        return hash(self.pieces.__hash__)
 
     def getMoves(self):
         return self.moves
@@ -375,11 +396,11 @@ def gameOver(puzzle):
 
 
 if __name__ == '__main__':
-    puzzle = easy_map()
-    # solution = search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states)
+    puzzle = medium_map()
+    solution = search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states)
     print("s1")
-    # full_path = search_algorithms.get_solution_path(solution)
+    full_path = search_algorithms.get_solution_path(solution)
     print("s2")
-    full_path = [easy_map(), medium_map(), hard_map()]
+    #full_path = [easy_map(), medium_map(), hard_map()]
     show_ai_path(full_path)
     print("s3")

@@ -19,19 +19,21 @@ class TreeNode:
 def breadth_first_search(initial_state, goal_state_func, operators_func):
     root = TreeNode(initial_state)  # create the root node in the search tree
     queue = deque([root])  # initialize the queue to store the nodes
+    visited = set()
 
     while queue:
         node = queue.popleft()  # get first element in the queue
+        visited.add(node.state)
         # print(node.state.show_tui())
+
         if goal_state_func(node.state):  # check goal state
             return node
 
         for state in operators_func(node.state):  # go through next states
-            child = TreeNode(state, node)
-
-            node.add_child(child)
-
-            queue.append(child)
+            if state not in visited:
+                child = TreeNode(state, node)
+                node.add_child(child)
+                queue.append(child)
 
     return None
 
