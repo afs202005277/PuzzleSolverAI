@@ -66,6 +66,7 @@ def draw_difficulties(screen):
 
 def draw_end_screen(screen, puzzle):
     screen.fill(BG_COLOR)
+    hint_button(screen)
     pygame.draw.rect(screen, GAME_BACKGROUND_COLOR,
                      pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE),
                      border_radius=5)
@@ -102,12 +103,36 @@ def draw_moves(screen, moves):
     screen.blit(moves,
                 (SCREEN_WIDTH / 2 - moves.get_width() / 2, 20))
 
+def hint_button(screen):
+    hint_image = pygame.image.load('assets/hint.png')
+    image_position = (SCREEN_WIDTH / 2 - hint_image.get_width() / 2, 770)
+    scaled_image = pygame.transform.scale(hint_image,
+                                          (hint_image.get_width() / 9, hint_image.get_height() / 9))
+    border_surface = pygame.Surface((scaled_image.get_width() + 10, scaled_image.get_height() + 10), pygame.SRCALPHA)
+
+    border_rect = pygame.draw.rect(border_surface, (255, 255, 255, 128),
+                                   (0, 0, scaled_image.get_width() + 10, scaled_image.get_height() + 10),
+                                   border_radius=10)
+
+    pygame.draw.circle(border_surface, (255, 255, 255, 128), (border_rect.left + 10, border_rect.top + 10), 10)
+    pygame.draw.circle(border_surface, (255, 255, 255, 128), (border_rect.right - 10, border_rect.top + 10), 10)
+    pygame.draw.circle(border_surface, (255, 255, 255, 128), (border_rect.left + 10, border_rect.bottom - 10), 10)
+    pygame.draw.circle(border_surface, (255, 255, 255, 128), (border_rect.right - 10, border_rect.bottom - 10), 10)
+
+    screen.blit(border_surface, (image_position[0] - 5, image_position[1] - 5))
+    screen.blit(scaled_image, image_position)
+
+    image_rect = pygame.Rect(image_position[0] - 5, image_position[1] - 5, scaled_image.get_width() + 10,
+                             scaled_image.get_height() + 10)
+    return image_rect
+
 
 def main_loop():
     screen = pygame_init()
     last_col = None
     last_row = None
     moving_piece_index = None
+    hint_rect = None
     puzzle = main.medium_map()
     game_state = 'main_menu'
 
@@ -148,6 +173,8 @@ def main_loop():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == pygame.BUTTON_LEFT:
                         start_pos = pygame.mouse.get_pos()
+                        if (hint_rect.collidepoint(start_pos)):
+                            print('hint clicked! TODO')
                         last_col = puzzle.getColIndex(start_pos[0])
                         last_row = puzzle.getRowIndex(start_pos[1])
                         tmp = [idx for idx, piece in enumerate(pieces) if is_colliding(piece, start_pos)]
@@ -187,6 +214,7 @@ def main_loop():
                                  border_radius=5)
                 pieces = puzzle.drawPieces(screen)
                 draw_moves(screen, puzzle.getMoves())
+                hint_rect = hint_button(screen)
                 pygame.display.flip()
                 pygame.display.update()
             elif game_state == 'end_screen':
