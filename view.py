@@ -239,7 +239,7 @@ def show_ai_path(path):
         step.drawPieces(screen)
         pygame.display.flip()
         pygame.display.update()
-        sleep(3)
+        sleep(2)
 
 
 if __name__ == '__main__':

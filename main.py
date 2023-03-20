@@ -29,7 +29,7 @@ class Piece:
         self.row_idx = row_idx
         self.col_idx = col_idx
         self.texture = texture
-        self.color = (0, 0, 0)
+        self.color = (0, 0, 0, 0)
         self.isObjective = isObjective
         self.isHighlighted = False
 
@@ -284,7 +284,7 @@ class Puzzle:
 
 
 def easy_map():
-    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
+    pieces = [Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
               Piece(2, 1, 2, 1, BLUE), Piece(2, 2, 2, 2, RED, True), Piece(1, 1, 4, 0, YELLOW),
               Piece(1, 1, 4, 1, YELLOW), Piece(1, 1, 4, 2, YELLOW), Piece(1, 1, 4, 3, YELLOW)]
 
@@ -315,12 +315,14 @@ def medium_map():
 
 # distance red block to exit
 def h1(puzzle):
+    # Distance from the red block to the exit.
     vector = (puzzle.get_objective_piece().col_idx - puzzle.exit_x,
               puzzle.get_objective_piece().row_idx - (puzzle.exit_x + puzzle.exit_width))
     return math.sqrt(vector[0] * vector[0] + vector[1] * vector[1])
 
 
 def h3(puzzle):
+    # The largest contiguous empty space near the red block.
     matrix = puzzle.show_tui()
     rows, cols = len(matrix), len(matrix[0])
 
@@ -342,7 +344,7 @@ def h3(puzzle):
             if max < tmp:
                 max = tmp
 
-    return max
+    return -max
 
 
 def h2(puzzle):
@@ -366,11 +368,13 @@ def h2(puzzle):
 
 
 def h4(puzzle):
-    return max(puzzle.get_objective_piece().col_idx,
+    # H4: Prioritize moves that keep the red block close to the edges of the game board.
+    return -max(puzzle.get_objective_piece().col_idx,
                puzzle.numCols - puzzle.get_objective_piece().width - puzzle.get_objective_piece().col_idx) * 100
 
 
 def h5(puzzle):
+    # Always ensure that the red block has at least one valid move option available.
     index = 0
     for i, piece in enumerate(puzzle.pieces):
         if piece.isObjective:
@@ -382,11 +386,12 @@ def h5(puzzle):
     for (x, y) in vectors:
         if puzzle.is_valid_move(index, puzzle.pieces[index].col_idx + x, puzzle.pieces[index].row_idx + y):
             weight += 1
-    return weight
+    return -weight
 
 
 def h7(puzzle, index):
-    return puzzle.pieces[index].width * puzzle.pieces[index].height
+    # prioritize moving the largest pieces first
+    return -puzzle.pieces[index].width * puzzle.pieces[index].height
 
 
 def move_piece_ai(puzzle, index, newX, newY):
@@ -419,10 +424,17 @@ def gameOver(puzzle):
 
 if __name__ == '__main__':
     puzzle = easy_map()
-    solution = search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states)
-    print("s1")
-    full_path = search_algorithms.get_solution_path(solution)
-    print("s2")
-    #full_path = [easy_map(), medium_map(), hard_map()]
-    show_ai_path(full_path)
-    print("s3")
+    heuristics = [h4]
+    for heuristic in heuristics:
+        solution = search_algorithms.a_star_search(puzzle, gameOver, get_child_states, heuristic)
+        full_path = search_algorithms.get_solution_path(solution)
+        show_ai_path(full_path)
+        sleep(2)
+        print("heuristic: ", heuristic)
+        print("Num states: ", len(full_path))
+        print("\n")
+    #solution = search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states)
+    #full_path = search_algorithms.get_solution_path(solution)
+    print(len(full_path))
+    # show_ai_path(full_path)
+

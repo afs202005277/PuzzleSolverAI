@@ -2,10 +2,11 @@ from collections import deque
 
 
 class TreeNode:
-    def __init__(self, state, parent=None):
+    def __init__(self, state, parent=None, cost=0):
         self.state = state
         self.parent = parent
         self.children = []
+        self.cost = cost
         if self.parent is None:
             self.depth = 0
         else:
@@ -110,28 +111,30 @@ def iterative_deepening_search(initial_state, goal_state_func, operators_func, d
 
 
 def h_a_star(node, heuristic):
-    return heuristic(node) + node.cost
+    return heuristic(node.state) + node.cost
 
 
 def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
     root = TreeNode(initial_state)  # create the root node in the search tree
     queue = [root]  # initialize the queue to store the nodes
     visited = []
+    iterations = 0
     while queue:
-        node = queue.pop()  # get first element in the queue
+        print(iterations)
+        iterations+=1
+        node = queue.pop(0)
         if goal_state_func(node.state):  # check goal state
             return node
 
         for state in operators_func(node.state):  # go through next states
             if state not in visited:
-                child = TreeNode(state, node)
-                child.cost += node.cost
+                child = TreeNode(state, node, node.cost + 1)
 
                 node.add_child(child)
 
                 queue.append(child)
 
-                sorted(queue, key=lambda x: h_a_star(x, heuristic), reverse=True)
+                queue = sorted(queue, key=lambda x: h_a_star(x, heuristic))
                 visited.append(state)
 
     return None
