@@ -10,9 +10,13 @@ HIGHLIGHT = 70
 ANIMATION_TIME = 10
 
 BLUE = "./assets/blue.png"
+BLUE_H = "./assets/blue_h.png"
 RED = "./assets/objective_cube.png"
+RED_H = "./assets/objective_cube_h.png"
 YELLOW = "./assets/yellow.png"
+YELLOW_H = "./assets/yellow_h.png"
 GREEN = "./assets/green.png"
+GREEN_H = "./assets/green_h.png"
 
 exit_image = pygame.image.load("./assets/exit.png")
 
@@ -25,7 +29,7 @@ class Piece:
         self.row_idx = row_idx
         self.col_idx = col_idx
         self.texture = texture
-        self.color = (0, 0, 0, 0)
+        self.color = (0, 0, 0)
         self.isObjective = isObjective
         self.isHighlighted = False
 
@@ -41,10 +45,28 @@ class Piece:
 
     def toggle_highlight(self):
         if self.isHighlighted:
-            self.color = (0, 0, 0, 0)
+
+            if self.texture == BLUE_H:
+                self.texture = BLUE
+            elif self.texture == YELLOW_H:
+                self.texture = YELLOW
+            elif self.texture == RED_H:
+                self.texture = RED
+            elif self.texture == GREEN_H:
+                self.texture = GREEN
+
             self.isHighlighted = False
         else:
-            self.color = (255, 255, 255, 255)
+
+            if self.texture == BLUE:
+                self.texture = BLUE_H
+            elif self.texture == YELLOW:
+                self.texture = YELLOW_H
+            elif self.texture == RED:
+                self.texture = RED_H
+            elif self.texture == GREEN:
+                self.texture = GREEN_H
+
             self.isHighlighted = True
 
     def get_occupied_positions(self):
@@ -396,7 +418,7 @@ def gameOver(puzzle):
 
 
 if __name__ == '__main__':
-    puzzle = medium_map()
+    puzzle = easy_map()
     solution = search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states)
     print("s1")
     full_path = search_algorithms.get_solution_path(solution)
