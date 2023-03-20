@@ -369,7 +369,7 @@ def h2(puzzle):
 
 def h4(puzzle):
     # H4: Prioritize moves that keep the red block close to the edges of the game board.
-    return -max(puzzle.get_objective_piece().col_idx,
+    return max(puzzle.get_objective_piece().col_idx,
                puzzle.numCols - puzzle.get_objective_piece().width - puzzle.get_objective_piece().col_idx) * 100
 
 
@@ -423,7 +423,7 @@ def gameOver(puzzle):
 
 
 if __name__ == '__main__':
-    puzzle = easy_map()
+    puzzle = hard_map()
     heuristics = [h4]
     for heuristic in heuristics:
         solution = search_algorithms.a_star_search(puzzle, gameOver, get_child_states, heuristic)

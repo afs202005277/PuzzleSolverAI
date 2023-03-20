@@ -1,3 +1,4 @@
+import heapq
 from collections import deque
 
 
@@ -115,15 +116,16 @@ def h_a_star(node, heuristic):
 
 
 def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
+    setattr(TreeNode, "__lt__", lambda self, other: heuristic(self.state) < heuristic(other.state))
     root = TreeNode(initial_state)  # create the root node in the search tree
     queue = [root]  # initialize the queue to store the nodes
-    visited = []
+    visited = set()
     iterations = 0
     while queue:
-        print(iterations)
-        iterations+=1
-        node = queue.pop(0)
+        iterations += 1
+        node = heapq.heappop(queue)
         if goal_state_func(node.state):  # check goal state
+            print(iterations)
             return node
 
         for state in operators_func(node.state):  # go through next states
@@ -132,9 +134,8 @@ def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
 
                 node.add_child(child)
 
-                queue.append(child)
+                heapq.heappush(queue, child)
 
                 queue = sorted(queue, key=lambda x: h_a_star(x, heuristic))
-                visited.append(state)
-
+                visited.add(state)
     return None
