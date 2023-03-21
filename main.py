@@ -435,7 +435,7 @@ def gameOver(puzzle):
 
 if __name__ == '__main__':
     uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
-    informed_search = {"A* search": a_star_search, "Weighted A* search": weighted_a_star_search}
+    informed_search = {"Greedy": greedy_search, "A* search": a_star_search, "Weighted A* search": weighted_a_star_search}
     heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
     levels = {'easy': easy_map(), 'medium': medium_map(), 'hard': hard_map()}
     optimal_solutions = dict()
