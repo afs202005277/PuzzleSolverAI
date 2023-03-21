@@ -388,13 +388,15 @@ def h5(puzzle, _):
             weight += 1
     return -weight
 
-def h6(puzzle):
+
+def h6(puzzle, _):
     # prioritize fitting pieces along the edges of the game board from largest to smallest
     score = 0
     for piece in puzzle.pieces:
         if not piece.isObjective:
             score += max(piece.col_idx, puzzle.numCols - piece.width - piece.col_idx) * piece.width * piece.height
     return -score
+
 
 def h7(puzzle, index):
     # prioritize moving the largest pieces first
@@ -475,5 +477,6 @@ if __name__ == '__main__':
                 statistics_informed[level]['time'][strategy][heuristic] = end - start
                 statistics_informed[level]['nodes'][strategy][heuristic] = details[1]
                 statistics_informed[level]['iterations'][strategy][heuristic] = details[2]
+
     app = show_data_web.show_data(statistics, statistics_informed)
-    app.run_server(debug=True)
+    app.run()
