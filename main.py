@@ -1,3 +1,4 @@
+import show_data_web
 from view import *
 from copy import deepcopy
 import math
@@ -284,7 +285,7 @@ class Puzzle:
 
 
 def easy_map():
-    pieces = [Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
+    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
               Piece(2, 1, 2, 1, BLUE), Piece(2, 2, 2, 2, RED, True), Piece(1, 1, 4, 0, YELLOW),
               Piece(1, 1, 4, 1, YELLOW), Piece(1, 1, 4, 2, YELLOW), Piece(1, 1, 4, 3, YELLOW)]
 
@@ -388,6 +389,13 @@ def h5(puzzle):
             weight += 1
     return -weight
 
+def h6(puzzle):
+    # prioritize fitting pieces along the edges of the game board from largest to smallest
+    score = 0
+    for piece in puzzle.pieces:
+        if not piece.isObjective:
+            score += max(piece.col_idx, puzzle.numCols - piece.width - piece.col_idx) * piece.width * piece.height
+    return -score
 
 def h7(puzzle, index):
     # prioritize moving the largest pieces first
@@ -423,7 +431,7 @@ def gameOver(puzzle):
 
 
 if __name__ == '__main__':
-    puzzle = hard_map()
+    """puzzle = hard_map()
     heuristics = [h4]
     for heuristic in heuristics:
         solution = search_algorithms.a_star_search(puzzle, gameOver, get_child_states, heuristic)
@@ -436,5 +444,39 @@ if __name__ == '__main__':
     #solution = search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states)
     #full_path = search_algorithms.get_solution_path(solution)
     print(len(full_path))
-    # show_ai_path(full_path)
+    # show_ai_path(full_path)"""
+
+    algorithms = {'easy': {'time': {'BFS': 3.519569158554077, 'DFS': 0.055368900299072266, 'IDS': 0.763897180557251}, 'nodes': {'BFS': 2539, 'DFS': 136, 'IDS': 136}, 'iterations': {'BFS': 1319, 'DFS': 31, 'IDS': 30}}}
+
+    heuristics = {
+        'easy': {
+            'Time': {
+                'A* Algorithm': {
+                    'h1': 1,
+                    'h2': 1,
+                },
+            },
+            'Distance': {
+                'A* Algorithm': {
+                    'h1': 1,
+                    'h2': 1,
+                },
+            },
+            'Knots': {
+                'A* Algorithm': {
+                    'h1': 1,
+                    'h2': 1,
+                },
+            },
+            'Iterations': {
+                'A* Algorithm': {
+                    'h1': 1,
+                    'h2': 1,
+                },
+            }
+        }
+    }
+
+    app = show_data_web.show_data(algorithms, heuristics)
+    app.run_server(debug=True)
 
