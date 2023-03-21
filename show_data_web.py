@@ -56,11 +56,11 @@ def show_data(algorithms, heuristics):
                             go.Bar(
                                 x=h,
                                 y=v,
-                                name=measure + ' on level ' + level + ' for algorithm ' + algo
+                                name=measure + ' on level ' + level + ' for ' + algo
                             )
                         ],
                         'layout': go.Layout(
-                            title=measure + ' on level ' + level + ' for algorithm ' + algo,
+                            title=measure + ' on level ' + level + ' for ' + algo,
                             xaxis={'title': 'Heuristics'},
                             yaxis={'title': measure}
                         )
