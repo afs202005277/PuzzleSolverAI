@@ -404,6 +404,10 @@ def h7(puzzle, index):
         return puzzle.pieces[index].width * puzzle.pieces[index].height
     return 0
 
+def h8(puzzle, index):
+    # prioritize moving the smallest pieces first
+    return -h7(puzzle, index)
+
 
 def move_piece_ai(puzzle, index, newX, newY):
     if puzzle.is_valid_move(index, newX, newY):
@@ -436,8 +440,8 @@ def gameOver(puzzle):
 if __name__ == '__main__':
     uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
     informed_search = {"A* search": a_star_search, "Weighted A* search": weighted_a_star_search}
-    heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
-    levels = {'easy': easy_map()}
+    heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7, "h8": h8}
+    levels = {'medium': medium_map()}
     statistics = dict()
 
     for level in levels:
