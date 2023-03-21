@@ -1,3 +1,4 @@
+import show_data_web
 from view import *
 from copy import deepcopy
 import math
@@ -218,6 +219,9 @@ class Puzzle:
             representation[self.exit_y][i] = '-'
         return representation
 
+    def show_gui(self):
+        print("TO BE DONE")
+
     def drawPieces(self, screen):
         pieces = []
 
@@ -384,16 +388,18 @@ def h5(puzzle, _):
             weight += 1
     return -weight
 
+def h6(puzzle):
+    # prioritize fitting pieces along the edges of the game board from largest to smallest
+    score = 0
+    for piece in puzzle.pieces:
+        if not piece.isObjective:
+            score += max(piece.col_idx, puzzle.numCols - piece.width - piece.col_idx) * piece.width * piece.height
+    return -score
 
 def h7(puzzle, index):
     # prioritize moving the largest pieces first
     if index is not None:
         return puzzle.pieces[index].width * puzzle.pieces[index].height
-    return 0
-
-
-def h6(_, tmp):
-    print("TEMP H6")
     return 0
 
 
@@ -462,7 +468,6 @@ if __name__ == '__main__':
                 end = time.time()
 
                 path = get_solution_path(details[0])
-
                 if not statistics_informed[level]['time'][strategy]:
                     statistics_informed[level]['time'][strategy] = {}
                     statistics_informed[level]['nodes'][strategy] = {}
@@ -470,6 +475,5 @@ if __name__ == '__main__':
                 statistics_informed[level]['time'][strategy][heuristic] = end - start
                 statistics_informed[level]['nodes'][strategy][heuristic] = details[1]
                 statistics_informed[level]['iterations'][strategy][heuristic] = details[2]
-
-    print(statistics)
-    print(statistics_informed)
+    app = show_data_web.show_data(statistics, statistics_informed)
+    app.run_server(debug=True)
