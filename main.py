@@ -438,10 +438,11 @@ if __name__ == '__main__':
     informed_search = {"A* search": a_star_search, "Weighted A* search": weighted_a_star_search}
     heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
     levels = {'easy': easy_map()}
+    optimal_solutions = dict()
     statistics = dict()
 
     for level in levels:
-        statistics[level] = {'time': {}, 'nodes': {}, 'iterations': {}}
+        statistics[level] = {'time': {}, 'nodes': {}, 'iterations': {}, 'precision': {}}
 
     for strategy in uninformed_search:
         for level in levels:
@@ -452,16 +453,23 @@ if __name__ == '__main__':
 
             path = get_solution_path(details[0])
 
+            if strategy == "BFS":
+                optimal_solutions[level] = len(path)
+            print(strategy)
+            print(len(path))
+            print("\n")
             statistics[level]['time'][strategy] = end - start
             statistics[level]['nodes'][strategy] = details[1]
             statistics[level]['iterations'][strategy] = details[2]
-
+            statistics[level]['precision'][strategy] = (abs(len(path) - optimal_solutions[level]) / optimal_solutions[
+                level]) * 100
 
     statistics_informed = dict()
     for level in levels:
         statistics_informed[level] = {'time': {algo_name: {} for algo_name in informed_search.keys()},
                                       'nodes': {algo_name: {} for algo_name in informed_search.keys()},
-                                      'iterations': {algo_name: {} for algo_name in informed_search.keys()}}
+                                      'iterations': {algo_name: {} for algo_name in informed_search.keys()},
+                                      'precision': {algo_name: {} for algo_name in informed_search.keys()}}
     for strategy in informed_search:
         for level in levels:
             for heuristic in heuristics:
@@ -475,9 +483,16 @@ if __name__ == '__main__':
                     statistics_informed[level]['time'][strategy] = {}
                     statistics_informed[level]['nodes'][strategy] = {}
                     statistics_informed[level]['iterations'][strategy] = {}
+                    statistics_informed[level]['precision'][strategy] = {}
+
+                print(heuristic)
+                print(len(path))
+                print("\n")
                 statistics_informed[level]['time'][strategy][heuristic] = end - start
                 statistics_informed[level]['nodes'][strategy][heuristic] = details[1]
                 statistics_informed[level]['iterations'][strategy][heuristic] = details[2]
+                statistics_informed[level]['precision'][strategy][heuristic] = ((len(path) - optimal_solutions[level]) /
+                                                                                optimal_solutions[level]) * 100
 
     app = show_data_web.show_data(statistics, statistics_informed)
     app.run()

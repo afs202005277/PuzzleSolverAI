@@ -89,14 +89,15 @@ def depth_limited_search(initial_state, goal_state_func, operators_func, depth_l
     root = TreeNode(initial_state)  # create the root node in the search tree
     queue = [root]  # initialize the queue to store the nodes
     visited = set()
-    depth = 0
+    iterations = 0
     puzzles_in_memory = 0
     while queue:
+        iterations += 1
         node = queue.pop()  # get first element in the queue
         if goal_state_func(node.state):  # check goal state
-            return [node, len(visited) + puzzles_in_memory, depth]
+            return [node, len(visited) + puzzles_in_memory, iterations]
 
-        if depth < depth_limit:
+        if node.depth < depth_limit:
             for state in operators_func(node.state):  # go through next states
                 if state not in visited:
                     child = TreeNode(state, node)
@@ -105,7 +106,6 @@ def depth_limited_search(initial_state, goal_state_func, operators_func, depth_l
                     puzzles_in_memory += 1
                     queue.append(child)
                     visited.add(state)
-        depth += 1
 
     return None
 
@@ -122,15 +122,17 @@ def iterative_deepening_search(initial_state, goal_state_func, operators_func):
             return answer
 
 
-def h_a_star(node, heuristic):
-    return heuristic(node.state) + node.cost
+def h_a_star(node, heuristic, moved):
+    return heuristic(node.state, moved) + node.cost
 
 
 def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
     setattr(TreeNode, "__lt__",
-            lambda self, other: heuristic(self.state, self.moved_piece) < heuristic(other.state, other.moved_piece))
+            lambda self, other: h_a_star(self, heuristic, self.moved_piece) < h_a_star(other, heuristic,
+                                                                                       other.moved_piece))
     root = TreeNode(initial_state)  # create the root node in the search tree
-    queue = [root]  # initialize the queue to store the nodes
+    queue = [root]
+    heapq.heapify(queue)  # initialize the queue to store the nodes
     visited = set()
     iterations = 0
     puzzles_in_memory = 0
@@ -151,6 +153,7 @@ def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
                 node.add_child(child)
 
                 heapq.heappush(queue, child)
+
                 puzzles_in_memory += 1
                 visited.add(state)
     return None
