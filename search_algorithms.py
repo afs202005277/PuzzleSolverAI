@@ -1,5 +1,6 @@
 import heapq
 from collections import deque
+import main
 
 
 class TreeNode:
@@ -118,7 +119,6 @@ def iterative_deepening_search(initial_state, goal_state_func, operators_func):
                                       operators_func,
                                       depth_limit)
         if answer:
-            print(depth_limit)
             return answer
 
 
@@ -127,7 +127,8 @@ def h_a_star(node, heuristic):
 
 
 def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
-    setattr(TreeNode, "__lt__", lambda self, other: heuristic(self.state, self.moved_piece) < heuristic(other.state, other.moved_piece))
+    setattr(TreeNode, "__lt__",
+            lambda self, other: heuristic(self.state, self.moved_piece) < heuristic(other.state, other.moved_piece))
     root = TreeNode(initial_state)  # create the root node in the search tree
     queue = [root]  # initialize the queue to store the nodes
     visited = set()
@@ -156,5 +157,6 @@ def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
 
 
 def weighted_a_star_search(initial_state, goal_state_func, operators_func, heuristic):
-    print("TO BE DONE")
-    return None
+    w = main.h1
+    return a_star_search(initial_state, goal_state_func, operators_func,
+                         lambda x, y: (heuristic(x, y) + w(x, None)) / 2)
