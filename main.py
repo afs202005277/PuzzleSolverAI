@@ -1,7 +1,8 @@
 from view import *
 from copy import deepcopy
 import math
-import search_algorithms
+from search_algorithms import *
+import time
 
 """BLUE = [0, 0, 120]
 RED = [120, 0, 0]
@@ -217,9 +218,6 @@ class Puzzle:
             representation[self.exit_y][i] = '-'
         return representation
 
-    def show_gui(self):
-        print("TO BE DONE")
-
     def drawPieces(self, screen):
         pieces = []
 
@@ -284,7 +282,7 @@ class Puzzle:
 
 
 def easy_map():
-    pieces = [Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
+    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
               Piece(2, 1, 2, 1, BLUE), Piece(2, 2, 2, 2, RED, True), Piece(1, 1, 4, 0, YELLOW),
               Piece(1, 1, 4, 1, YELLOW), Piece(1, 1, 4, 2, YELLOW), Piece(1, 1, 4, 3, YELLOW)]
 
@@ -314,14 +312,15 @@ def medium_map():
 
 
 # distance red block to exit
-def h1(puzzle):
+def h1(puzzle, _):
     # Distance from the red block to the exit.
-    vector = (puzzle.get_objective_piece().col_idx - puzzle.exit_x,
-              puzzle.get_objective_piece().row_idx - (puzzle.exit_x + puzzle.exit_width))
+
+    vector = (puzzle.objectivePiece.col_idx - puzzle.exit_x,
+              puzzle.objectivePiece.row_idx - (puzzle.exit_x + puzzle.exit_width))
     return math.sqrt(vector[0] * vector[0] + vector[1] * vector[1])
 
 
-def h3(puzzle):
+def h3(puzzle, _):
     # The largest contiguous empty space near the red block.
     matrix = puzzle.show_tui()
     rows, cols = len(matrix), len(matrix[0])
@@ -347,18 +346,15 @@ def h3(puzzle):
     return -max
 
 
-def h2(puzzle):
+def h2(puzzle, _):
     # weighted sum of the number of obstacles between the red block and the exit
     path = []
 
     weight = 0
-    for piece in puzzle.pieces:
-        if piece.isObjective:
-            for i in range(piece.width):
-                for j in range(puzzle.numRows - piece.row_idx):
-                    path.append((piece.col_idx + i, piece.row_idx + j))
-            break
-
+    piece = puzzle.objectivePiece
+    for i in range(piece.width):
+        for j in range(puzzle.numRows - piece.row_idx):
+            path.append((piece.col_idx + i, piece.row_idx + j))
     for piece in puzzle.pieces:
         if not piece.isObjective:
             if (piece.col_idx, piece.row_idx) in path:
@@ -367,13 +363,13 @@ def h2(puzzle):
     return weight
 
 
-def h4(puzzle):
+def h4(puzzle, _):
     # H4: Prioritize moves that keep the red block close to the edges of the game board.
-    return max(puzzle.get_objective_piece().col_idx,
-               puzzle.numCols - puzzle.get_objective_piece().width - puzzle.get_objective_piece().col_idx) * 100
+    return max(puzzle.objectivePiece.col_idx,
+               puzzle.numCols - puzzle.objectivePiece.width - puzzle.objectivePiece.col_idx) * 100
 
 
-def h5(puzzle):
+def h5(puzzle, _):
     # Always ensure that the red block has at least one valid move option available.
     index = 0
     for i, piece in enumerate(puzzle.pieces):
@@ -391,7 +387,14 @@ def h5(puzzle):
 
 def h7(puzzle, index):
     # prioritize moving the largest pieces first
-    return -puzzle.pieces[index].width * puzzle.pieces[index].height
+    if index is not None:
+        return puzzle.pieces[index].width * puzzle.pieces[index].height
+    return 0
+
+
+def h6(_, tmp):
+    print("TEMP H6")
+    return 0
 
 
 def move_piece_ai(puzzle, index, newX, newY):
@@ -423,18 +426,50 @@ def gameOver(puzzle):
 
 
 if __name__ == '__main__':
-    puzzle = hard_map()
-    heuristics = [h4]
-    for heuristic in heuristics:
-        solution = search_algorithms.a_star_search(puzzle, gameOver, get_child_states, heuristic)
-        full_path = search_algorithms.get_solution_path(solution)
-        show_ai_path(full_path)
-        sleep(2)
-        print("heuristic: ", heuristic)
-        print("Num states: ", len(full_path))
-        print("\n")
-    #solution = search_algorithms.breadth_first_search(puzzle, gameOver, get_child_states)
-    #full_path = search_algorithms.get_solution_path(solution)
-    print(len(full_path))
-    # show_ai_path(full_path)
+    uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
+    informed_search = {"A* search": a_star_search}
+    heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
+    levels = {'easy': easy_map()}
+    statistics = dict()
 
+    for level in levels:
+        statistics[level] = {'time': {}, 'nodes': {}, 'iterations': {}}
+
+    for strategy in uninformed_search:
+        for level in levels:
+            start = time.time()
+            # [node, len(visited) + puzzles_in_memory, iterations]
+            details = uninformed_search[strategy](levels[level], gameOver, get_child_states)
+            end = time.time()
+
+            path = get_solution_path(details[0])
+
+            statistics[level]['time'][strategy] = end - start
+            statistics[level]['nodes'][strategy] = details[1]
+            statistics[level]['iterations'][strategy] = details[2]
+
+    statistics_informed = dict()
+    for level in levels:
+        statistics_informed[level] = {'time': {algo_name: {} for algo_name in informed_search.keys()},
+                                      'nodes': {algo_name: {} for algo_name in informed_search.keys()},
+                                      'iterations': {algo_name: {} for algo_name in informed_search.keys()}}
+    for strategy in informed_search:
+        for level in levels:
+            for heuristic in heuristics:
+                start = time.time()
+                # [node, len(visited) + puzzles_in_memory, iterations]
+                details = informed_search[strategy](levels[level], gameOver, get_child_states, heuristics[heuristic])
+                end = time.time()
+
+                path = get_solution_path(details[0])
+
+                if not statistics_informed[level]['time'][strategy]:
+                    statistics_informed[level]['time'][strategy] = {}
+                    statistics_informed[level]['nodes'][strategy] = {}
+                    statistics_informed[level]['iterations'][strategy] = {}
+                statistics_informed[level]['time'][strategy][heuristic] = end - start
+                statistics_informed[level]['nodes'][strategy][heuristic] = details[1]
+                statistics_informed[level]['iterations'][strategy][heuristic] = details[2]
+
+    print(statistics)
+    print(statistics_informed)

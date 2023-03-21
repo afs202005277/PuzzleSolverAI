@@ -8,6 +8,7 @@ class TreeNode:
         self.parent = parent
         self.children = []
         self.cost = cost
+        self.moved_piece = None
         if self.parent is None:
             self.depth = 0
         else:
@@ -19,23 +20,26 @@ class TreeNode:
 
 
 def breadth_first_search(initial_state, goal_state_func, operators_func):
-    root = TreeNode(initial_state)  # create the root node in the search tree
-    queue = deque([root])  # initialize the queue to store the nodes
+    root = TreeNode(initial_state)
+    queue = deque([root])
     visited = set()
 
+    puzzles_in_memory = 0
+    iterations = 0
     while queue:
-        node = queue.popleft()  # get first element in the queue
+        iterations += 1
+        node = queue.popleft()
         visited.add(node.state)
-        # print(node.state.show_tui())
 
-        if goal_state_func(node.state):  # check goal state
-            return node
+        if goal_state_func(node.state):
+            return [node, len(visited) + puzzles_in_memory, iterations]
 
-        for state in operators_func(node.state):  # go through next states
+        for state in operators_func(node.state):
             if state not in visited:
                 child = TreeNode(state, node)
                 node.add_child(child)
                 queue.append(child)
+                puzzles_in_memory += 1
 
     return None
 
@@ -57,12 +61,15 @@ def get_solution_path(node):
 def depth_first_search(initial_state, goal_state_func, operators_func):
     root = TreeNode(initial_state)  # create the root node in the search tree
     queue = [root]  # initialize the queue to store the nodes
-    visited = list()
+    visited = set()
 
+    puzzles_in_memory = 0
+    iterations = 0
     while queue:
+        iterations += 1
         node = queue.pop()  # get first element in the queue
         if goal_state_func(node.state):  # check goal state
-            return node
+            return [node, len(visited) + puzzles_in_memory, iterations]
 
         for state in operators_func(node.state):  # go through next states
             if state not in visited:
@@ -71,7 +78,8 @@ def depth_first_search(initial_state, goal_state_func, operators_func):
                 node.add_child(child)
 
                 queue.append(child)
-                visited.append(state)
+                puzzles_in_memory += 1
+                visited.add(state)
 
     return None
 
@@ -79,12 +87,13 @@ def depth_first_search(initial_state, goal_state_func, operators_func):
 def depth_limited_search(initial_state, goal_state_func, operators_func, depth_limit):
     root = TreeNode(initial_state)  # create the root node in the search tree
     queue = [root]  # initialize the queue to store the nodes
-    visited = list()
+    visited = set()
     depth = 0
+    puzzles_in_memory = 0
     while queue:
         node = queue.pop()  # get first element in the queue
         if goal_state_func(node.state):  # check goal state
-            return node
+            return [node, len(visited) + puzzles_in_memory, depth]
 
         if depth < depth_limit:
             for state in operators_func(node.state):  # go through next states
@@ -92,22 +101,24 @@ def depth_limited_search(initial_state, goal_state_func, operators_func, depth_l
                     child = TreeNode(state, node)
 
                     node.add_child(child)
-
+                    puzzles_in_memory += 1
                     queue.append(child)
-                    visited.append(state)
+                    visited.add(state)
         depth += 1
 
     return None
 
 
-def iterative_deepening_search(initial_state, goal_state_func, operators_func, depth_limit):
-    for i in range(depth_limit):
+def iterative_deepening_search(initial_state, goal_state_func, operators_func):
+    depth_limit = 0
+    while True:
+        depth_limit += 1
         answer = depth_limited_search(initial_state,
                                       goal_state_func,
                                       operators_func,
-                                      i)
+                                      depth_limit)
         if answer:
-            print(i)
+            print(depth_limit)
             return answer
 
 
@@ -116,26 +127,34 @@ def h_a_star(node, heuristic):
 
 
 def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
-    setattr(TreeNode, "__lt__", lambda self, other: heuristic(self.state) < heuristic(other.state))
+    setattr(TreeNode, "__lt__", lambda self, other: heuristic(self.state, self.moved_piece) < heuristic(other.state, other.moved_piece))
     root = TreeNode(initial_state)  # create the root node in the search tree
     queue = [root]  # initialize the queue to store the nodes
     visited = set()
     iterations = 0
+    puzzles_in_memory = 0
     while queue:
         iterations += 1
         node = heapq.heappop(queue)
         if goal_state_func(node.state):  # check goal state
-            print(iterations)
-            return node
+            return [node, len(visited) + puzzles_in_memory, iterations]
 
         for state in operators_func(node.state):  # go through next states
             if state not in visited:
+                for i, piece in enumerate(node.state.pieces):
+                    if piece != state.pieces[i]:
+                        state.moved_piece = i
+                        break
                 child = TreeNode(state, node, node.cost + 1)
 
                 node.add_child(child)
 
                 heapq.heappush(queue, child)
-
-                queue = sorted(queue, key=lambda x: h_a_star(x, heuristic))
+                puzzles_in_memory += 1
                 visited.add(state)
+    return None
+
+
+def weighted_a_star_search(initial_state, goal_state_func, operators_func, heuristic):
+    print("TO BE DONE")
     return None
