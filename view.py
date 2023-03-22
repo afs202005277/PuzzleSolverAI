@@ -177,7 +177,7 @@ def main_loop():
                         start_pos = pygame.mouse.get_pos()
                         if hint_rect.collidepoint(start_pos):
                             if first_click:
-                                sol = main.a_star_search(puzzle, main.gameOver, main.get_child_states, main.h4)
+                                sol = main.weighted_a_star_search(puzzle, main.gameOver, main.get_child_states, main.h4)
                                 path = main.get_solution_path(sol[0])
                                 main.movedPiece(path[0], path[1]).toggle_highlight()
                                 first_click = False
@@ -196,7 +196,10 @@ def main_loop():
                         tmp = [idx for idx, piece in enumerate(pieces) if is_colliding(piece, start_pos)]
                         if len(tmp) == 1:
                             moving_piece_index = tmp[0]
-                            puzzle.getPiece(moving_piece_index).toggle_highlight(True)
+                            if not first_click:
+                                puzzle.getPiece(moving_piece_index).toggle_highlight(True)
+                            else:
+                                puzzle.getPiece(moving_piece_index).toggle_highlight()
                             path = None
                             first_click = True
                 elif event.type == pygame.MOUSEBUTTONUP:
