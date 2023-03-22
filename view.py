@@ -173,8 +173,15 @@ def main_loop():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == pygame.BUTTON_LEFT:
                         start_pos = pygame.mouse.get_pos()
-                        if (hint_rect.collidepoint(start_pos)):
-                            print('hint clicked! TODO')
+                        if hint_rect.collidepoint(start_pos):
+                            sol = main.a_star_search(puzzle, main.gameOver, main.get_child_states, main.h4)
+                            path = main.get_solution_path(sol[0])
+                            if main.gameOver(path[1]):
+                                puzzle.move_piece_delta(puzzle.objectivePiece.id, 0, 3)
+                                game_state = "end_screen"
+                            else:
+                                puzzle = path[1]
+
                         last_col = puzzle.getColIndex(start_pos[0])
                         last_row = puzzle.getRowIndex(start_pos[1])
                         tmp = [idx for idx, piece in enumerate(pieces) if is_colliding(piece, start_pos)]
