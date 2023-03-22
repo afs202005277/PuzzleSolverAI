@@ -45,8 +45,18 @@ class Piece:
     def __hash__(self):
         return hash((self.row_idx, self.col_idx, self.width, self.height))
 
-    def toggle_highlight(self):
-        if self.isHighlighted:
+    def toggle_highlight(self, force=False):
+        if force:
+            if self.texture == BLUE:
+                self.texture = BLUE_H
+            elif self.texture == YELLOW:
+                self.texture = YELLOW_H
+            elif self.texture == RED:
+                self.texture = RED_H
+            elif self.texture == GREEN:
+                self.texture = GREEN_H
+
+        elif self.isHighlighted:
 
             if self.texture == BLUE_H:
                 self.texture = BLUE
@@ -404,7 +414,11 @@ def h7(puzzle, index):
         return puzzle.pieces[index].width * puzzle.pieces[index].height
     return 0
 
-
+def movedPiece(puzzle1, puzzle2):
+    for i in range(len(puzzle1.pieces)):
+        if puzzle1.pieces[i] != puzzle2.pieces[i]:
+            return puzzle1.pieces[i]
+    return None
 def move_piece_ai(puzzle, index, newX, newY):
     if puzzle.is_valid_move(index, newX, newY):
         res = deepcopy(puzzle)
