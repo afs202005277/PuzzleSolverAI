@@ -126,6 +126,38 @@ def h_a_star(node, heuristic, moved):
     return heuristic(node.state, moved) + node.cost
 
 
+def greedy_search(initial_state, goal_state_func, operators_func, heuristic):
+    setattr(TreeNode, "__lt__",
+            lambda self, other: h_a_star(self, heuristic, self.moved_piece) < h_a_star(other, heuristic,
+                                                                                       other.moved_piece))
+    root = TreeNode(initial_state)  # create the root node in the search tree
+    queue = [root]
+    heapq.heapify(queue)  # initialize the queue to store the nodes
+    visited = set()
+    iterations = 0
+    puzzles_in_memory = 0
+    while queue:
+        iterations += 1
+        node = heapq.heappop(queue)
+        if goal_state_func(node.state):  # check goal state
+            return [node, len(visited) + puzzles_in_memory, iterations]
+
+        for state in operators_func(node.state):  # go through next states
+            if state not in visited:
+                for i, piece in enumerate(node.state.pieces):
+                    if piece != state.pieces[i]:
+                        state.moved_piece = i
+                        break
+                child = TreeNode(state, node)
+
+                node.add_child(child)
+
+                heapq.heappush(queue, child)
+
+                puzzles_in_memory += 1
+                visited.add(state)
+    return None
+
 def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
     setattr(TreeNode, "__lt__",
             lambda self, other: h_a_star(self, heuristic, self.moved_piece) < h_a_star(other, heuristic,
