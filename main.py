@@ -45,8 +45,18 @@ class Piece:
     def __hash__(self):
         return hash((self.row_idx, self.col_idx, self.width, self.height))
 
-    def toggle_highlight(self):
-        if self.isHighlighted:
+    def toggle_highlight(self, force=False):
+        if force:
+            if self.texture == BLUE:
+                self.texture = BLUE_H
+            elif self.texture == YELLOW:
+                self.texture = YELLOW_H
+            elif self.texture == RED:
+                self.texture = RED_H
+            elif self.texture == GREEN:
+                self.texture = GREEN_H
+
+        elif self.isHighlighted:
 
             if self.texture == BLUE_H:
                 self.texture = BLUE
@@ -408,6 +418,12 @@ def h8(puzzle, index):
     # prioritize moving the smallest pieces first
     return -h7(puzzle, index)
 
+def movedPiece(puzzle1, puzzle2):
+    for i in range(len(puzzle1.pieces)):
+        if puzzle1.pieces[i] != puzzle2.pieces[i]:
+            return puzzle1.pieces[i]
+    return None
+
 
 def move_piece_ai(puzzle, index, newX, newY):
     if puzzle.is_valid_move(index, newX, newY):
@@ -437,16 +453,17 @@ def gameOver(puzzle):
     return puzzle.isGameOver
 
 
+import sys
 if __name__ == '__main__':
     uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
-    informed_search = {"A* search": a_star_search, "Weighted A* search": weighted_a_star_search}
-    heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7, "h8": h8}
-    levels = {'easy': easy_map(), 'medium': medium_map(), 'hard': hard_map()}
+    informed_search = {"Greedy": greedy_search, "A* search": a_star_search, "Weighted A* search": weighted_a_star_search}
+    heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
+    levels = {'easy': hard_map()}
     optimal_solutions = dict()
     statistics = dict()
 
     for level in levels:
-        statistics[level] = {'time': {}, 'nodes': {}, 'iterations': {}, 'precision': {}}
+        statistics[level] = {'time': {}, 'nodes': {}, 'iterations': {}, 'relative error': {}}
 
     for strategy in uninformed_search:
         for level in levels:
@@ -461,15 +478,16 @@ if __name__ == '__main__':
             statistics[level]['time'][strategy] = end - start
             statistics[level]['nodes'][strategy] = details[1]
             statistics[level]['iterations'][strategy] = details[2]
-            statistics[level]['precision'][strategy] = (abs(len(path) - optimal_solutions[level]) / optimal_solutions[
-                level]) * 100
+            statistics[level]['relative error'][strategy] = (abs(len(path) - optimal_solutions[level]) /
+                                                             optimal_solutions[
+                                                                 level]) * 100
 
     statistics_informed = dict()
     for level in levels:
         statistics_informed[level] = {'time': {algo_name: {} for algo_name in informed_search.keys()},
                                       'nodes': {algo_name: {} for algo_name in informed_search.keys()},
                                       'iterations': {algo_name: {} for algo_name in informed_search.keys()},
-                                      'precision': {algo_name: {} for algo_name in informed_search.keys()}}
+                                      'relative error': {algo_name: {} for algo_name in informed_search.keys()}}
     for strategy in informed_search:
         for level in levels:
             for heuristic in heuristics:
@@ -483,13 +501,14 @@ if __name__ == '__main__':
                     statistics_informed[level]['time'][strategy] = {}
                     statistics_informed[level]['nodes'][strategy] = {}
                     statistics_informed[level]['iterations'][strategy] = {}
-                    statistics_informed[level]['precision'][strategy] = {}
+                    statistics_informed[level]['relative error'][strategy] = {}
 
                 statistics_informed[level]['time'][strategy][heuristic] = end - start
                 statistics_informed[level]['nodes'][strategy][heuristic] = details[1]
                 statistics_informed[level]['iterations'][strategy][heuristic] = details[2]
-                statistics_informed[level]['precision'][strategy][heuristic] = ((len(path) - optimal_solutions[level]) /
-                                                                                optimal_solutions[level]) * 100
+                statistics_informed[level]['relative error'][strategy][heuristic] = ((len(path) - optimal_solutions[
+                    level]) /
+                                                                                     optimal_solutions[level]) * 100
 
     app = show_data_web.show_data(statistics, statistics_informed)
     app.run()
