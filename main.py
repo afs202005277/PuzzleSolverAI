@@ -306,9 +306,9 @@ def easy_map():
 
 
 def hard_map():
-    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 2, 0, 1, RED, True), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
-              Piece(1, 1, 2, 1, YELLOW), Piece(1, 1, 3, 1, YELLOW), Piece(1, 1, 3, 2, YELLOW),
-              Piece(1, 1, 2, 2, YELLOW), Piece(2, 1, 2, 3, BLUE), Piece(1, 2, 4, 1, GREEN)]
+    pieces = [Piece(1, 2, 0, 0, GREEN), Piece(1, 1, 0, 2, YELLOW), Piece(2, 1, 0, 3, BLUE),
+              Piece(1, 1, 1, 0, YELLOW), Piece(2, 2, 1, 1, RED, True), Piece(2, 1, 2, 3, BLUE),
+              Piece(2, 1, 3, 0, BLUE), Piece(1, 1, 3, 1, YELLOW), Piece(2, 1, 3, 2, BLUE), Piece(1, 1, 2, 0, YELLOW)]
 
     puzzle = Puzzle(5, 4, pieces)
 
@@ -458,7 +458,7 @@ if __name__ == '__main__':
     uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
     informed_search = {"Greedy": greedy_search, "A* search": a_star_search, "Weighted A* search": weighted_a_star_search}
     heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
-    levels = {'easy': easy_map()}
+    levels = {'easy': easy_map(), 'medium': medium_map(),'hard': hard_map()}
     optimal_solutions = dict()
     statistics = dict()
 
@@ -468,19 +468,27 @@ if __name__ == '__main__':
     for strategy in uninformed_search:
         for level in levels:
             start = time.time()
-            details = uninformed_search[strategy](levels[level], gameOver, get_child_states)
+            if (strategy == 'BFS' and level == 'hard'): pass
+            else:
+                details = uninformed_search[strategy](levels[level], gameOver, get_child_states)
             end = time.time()
 
             path = get_solution_path(details[0])
 
             if strategy == "BFS":
                 optimal_solutions[level] = len(path)
-            statistics[level]['time'][strategy] = end - start
-            statistics[level]['nodes'][strategy] = details[1]
-            statistics[level]['iterations'][strategy] = details[2]
-            statistics[level]['relative error'][strategy] = (abs(len(path) - optimal_solutions[level]) /
-                                                             optimal_solutions[
-                                                                 level]) * 100
+            if level == 'hard' and strategy == "BFS":
+                statistics[level]['time'][strategy] = 99999
+                statistics[level]['nodes'][strategy] = 99999
+                statistics[level]['iterations'][strategy] = 99999
+                statistics[level]['relative error'][strategy] = 0
+            else:
+                statistics[level]['time'][strategy] = end - start
+                statistics[level]['nodes'][strategy] = details[1]
+                statistics[level]['iterations'][strategy] = details[2]
+                statistics[level]['relative error'][strategy] = (abs(len(path) - optimal_solutions[level]) /
+                                                                 optimal_solutions[
+                                                                     level]) * 100
 
     statistics_informed = dict()
     for level in levels:
