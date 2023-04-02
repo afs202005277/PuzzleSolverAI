@@ -27,6 +27,7 @@ OFFSET = 10
 BG_COLOR = (0, 51, 68)
 GAME_BACKGROUND_COLOR = (20, 58, 75)
 
+
 class Piece:
     def __init__(self, height, width, row_idx, col_idx, texture, isObjective=False):
         self.id = -1
@@ -96,9 +97,6 @@ class Piece:
         positions = self.get_occupied_positions()
         for (x, y) in positions:
             representation[y][x] = self.id
-
-    def show_gui(self):
-        print("TO BE DONE")
 
 
 class Puzzle:
@@ -290,6 +288,7 @@ class Puzzle:
                 screen.blit(texture_tmp, pieceDraw)
             pieces.append(pieceDraw)
         return pieces
+
 
 def easy_map():
     pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
