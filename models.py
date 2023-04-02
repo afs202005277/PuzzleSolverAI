@@ -1,13 +1,6 @@
-import show_data_web
-from view import *
+import pygame
 from copy import deepcopy
-import math
-from search_algorithms import *
-import time
 
-"""BLUE = [0, 0, 120]
-RED = [120, 0, 0]
-YELLOW = [120, 120, 0]"""
 HIGHLIGHT = 70
 ANIMATION_TIME = 10
 
@@ -22,6 +15,17 @@ GREEN_H = "./assets/green_h.png"
 
 exit_image = pygame.image.load("./assets/exit.png")
 
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 840
+
+GAME_WIDTH_START = 80
+GAME_HEIGHT_START = 80
+GAME_WIDTH_SIZE = 450
+GAME_HEIGHT_SIZE = 640
+OFFSET = 10
+
+BG_COLOR = (0, 51, 68)
+GAME_BACKGROUND_COLOR = (20, 58, 75)
 
 class Piece:
     def __init__(self, height, width, row_idx, col_idx, texture, isObjective=False):
@@ -287,21 +291,10 @@ class Puzzle:
             pieces.append(pieceDraw)
         return pieces
 
-
 def easy_map():
     pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
               Piece(2, 1, 2, 1, BLUE), Piece(2, 2, 2, 2, RED, True), Piece(1, 1, 4, 0, YELLOW),
               Piece(1, 1, 4, 1, YELLOW), Piece(1, 1, 4, 2, YELLOW), Piece(1, 1, 4, 3, YELLOW)]
-
-    puzzle = Puzzle(5, 4, pieces)
-
-    return puzzle
-
-
-def hard_map():
-    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 2, 0, 1, RED, True), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
-              Piece(1, 1, 2, 1, YELLOW), Piece(1, 1, 3, 1, YELLOW), Piece(1, 1, 3, 2, YELLOW),
-              Piece(1, 1, 2, 2, YELLOW), Piece(2, 1, 2, 3, BLUE), Piece(1, 2, 4, 1, GREEN)]
 
     puzzle = Puzzle(5, 4, pieces)
 
@@ -318,98 +311,14 @@ def medium_map():
     return puzzle
 
 
-# distance red block to exit
-def h1(puzzle, _):
-    # Distance from the red block to the exit.
+def hard_map():
+    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 2, 0, 1, RED, True), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
+              Piece(1, 1, 2, 1, YELLOW), Piece(1, 1, 3, 1, YELLOW), Piece(1, 1, 3, 2, YELLOW),
+              Piece(1, 1, 2, 2, YELLOW), Piece(2, 1, 2, 3, BLUE), Piece(1, 2, 4, 1, GREEN)]
 
-    vector = (puzzle.objectivePiece.col_idx - puzzle.exit_x,
-              puzzle.objectivePiece.row_idx - (puzzle.exit_x + puzzle.exit_width))
-    return math.sqrt(vector[0] * vector[0] + vector[1] * vector[1])
+    puzzle = Puzzle(5, 4, pieces)
 
-
-def h3(puzzle, _):
-    # The largest contiguous empty space near the red block.
-    matrix = puzzle.show_tui()
-    rows, cols = len(matrix), len(matrix[0])
-
-    def dfs(row, col):
-        if row < 0 or row >= rows - 1 or col < 0 or col >= cols - 1:
-            return 0
-
-        if matrix[row][col]:
-            return 0
-
-        size = 1 + dfs(row + 1, col) + dfs(row, col + 1)
-
-        return size
-
-    max = 0
-    for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
-            tmp = dfs(i, j)
-            if max < tmp:
-                max = tmp
-
-    return -max
-
-
-def h2(puzzle, _):
-    # weighted sum of the number of obstacles between the red block and the exit
-    path = []
-
-    weight = 0
-    piece = puzzle.objectivePiece
-    for i in range(piece.width):
-        for j in range(puzzle.numRows - piece.row_idx):
-            path.append((piece.col_idx + i, piece.row_idx + j))
-    for piece in puzzle.pieces:
-        if not piece.isObjective:
-            if (piece.col_idx, piece.row_idx) in path:
-                weight += (piece.width ** 2) * piece.height
-
-    return weight
-
-
-def h4(puzzle, _):
-    # H4: Prioritize moves that keep the red block close to the edges of the game board.
-    return max(puzzle.objectivePiece.col_idx,
-               puzzle.numCols - puzzle.objectivePiece.width - puzzle.objectivePiece.col_idx) * 100
-
-
-def h5(puzzle, _):
-    # Always ensure that the red block has at least one valid move option available.
-    index = 0
-    for i, piece in enumerate(puzzle.pieces):
-        if piece.isObjective:
-            index = i
-            break
-    vectors = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-
-    weight = 0
-    for (x, y) in vectors:
-        if puzzle.is_valid_move(index, puzzle.pieces[index].col_idx + x, puzzle.pieces[index].row_idx + y):
-            weight += 1
-    return -weight
-
-
-def h6(puzzle, _):
-    # prioritize fitting pieces along the edges of the game board from largest to smallest
-    score = 0
-    for piece in puzzle.pieces:
-        if not piece.isObjective:
-            score += max(piece.col_idx, puzzle.numCols - piece.width - piece.col_idx) * piece.width * piece.height
-    return -score
-
-
-def h7(puzzle, index):
-    # prioritize moving the largest pieces first
-    if index is not None:
-        return puzzle.pieces[index].width * puzzle.pieces[index].height
-    return 0
-
-def h8(puzzle, index):
-    # prioritize moving the smallest pieces first
-    return -h7(puzzle, index)
+    return puzzle
 
 
 def movedPiece(puzzle1, puzzle2):
@@ -445,64 +354,3 @@ def gameOver(puzzle):
     widthRule = puzzle.objectivePiece.col_idx >= puzzle.exit_x and puzzle.objectivePiece.col_idx + puzzle.objectivePiece.width <= puzzle.exit_x + puzzle.exit_width
     puzzle.isGameOver = puzzle.objectivePiece is not None and heightRule and widthRule
     return puzzle.isGameOver
-
-
-if __name__ == '__main__':
-    uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
-    informed_search = {"Greedy": greedy_search, "A* search": a_star_search,
-                       "Weighted A* search": weighted_a_star_search}
-    heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
-    levels = {'easy': easy_map()}
-    optimal_solutions = dict()
-    statistics = dict()
-
-    for level in levels:
-        statistics[level] = {'time': {}, 'nodes': {}, 'iterations': {}, 'relative error': {}}
-
-    for strategy in uninformed_search:
-        for level in levels:
-            start = time.time()
-            details = uninformed_search[strategy](levels[level], gameOver, get_child_states)
-            end = time.time()
-
-            path = get_solution_path(details[0])
-
-            if strategy == "BFS":
-                optimal_solutions[level] = len(path)
-            statistics[level]['time'][strategy] = end - start
-            statistics[level]['nodes'][strategy] = details[1]
-            statistics[level]['iterations'][strategy] = details[2]
-            statistics[level]['relative error'][strategy] = (abs(len(path) - optimal_solutions[level]) /
-                                                             optimal_solutions[
-                                                                 level]) * 100
-
-    statistics_informed = dict()
-    for level in levels:
-        statistics_informed[level] = {'time': {algo_name: {} for algo_name in informed_search.keys()},
-                                      'nodes': {algo_name: {} for algo_name in informed_search.keys()},
-                                      'iterations': {algo_name: {} for algo_name in informed_search.keys()},
-                                      'relative error': {algo_name: {} for algo_name in informed_search.keys()}}
-    for strategy in informed_search:
-        for level in levels:
-            for heuristic in heuristics:
-                start = time.time()
-                # [node, len(visited) + puzzles_in_memory, iterations]
-                details = informed_search[strategy](levels[level], gameOver, get_child_states, heuristics[heuristic])
-                end = time.time()
-
-                path = get_solution_path(details[0])
-                if not statistics_informed[level]['time'][strategy]:
-                    statistics_informed[level]['time'][strategy] = {}
-                    statistics_informed[level]['nodes'][strategy] = {}
-                    statistics_informed[level]['iterations'][strategy] = {}
-                    statistics_informed[level]['relative error'][strategy] = {}
-
-                statistics_informed[level]['time'][strategy][heuristic] = end - start
-                statistics_informed[level]['nodes'][strategy][heuristic] = details[1]
-                statistics_informed[level]['iterations'][strategy][heuristic] = details[2]
-                statistics_informed[level]['relative error'][strategy][heuristic] = ((len(path) - optimal_solutions[
-                    level]) /
-                                                                                     optimal_solutions[level]) * 100
-
-    app = show_data_web.show_data(statistics, statistics_informed)
-    app.run()

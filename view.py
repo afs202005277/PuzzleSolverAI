@@ -1,24 +1,12 @@
 from time import sleep
 
 import pygame
-import main
-
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 840
-
-GAME_WIDTH_START = 80
-GAME_HEIGHT_START = 80
-GAME_WIDTH_SIZE = 450
-GAME_HEIGHT_SIZE = 640
-OFFSET = 10
-
-BG_COLOR = (0, 51, 68)
-GAME_BACKGROUND_COLOR = (20, 58, 75)
+import analysis
 
 
 def pygame_init():
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((analysis.SCREEN_WIDTH, analysis.SCREEN_HEIGHT))
     pygame.display.set_caption("Block Escape")
     return screen
 
@@ -28,26 +16,26 @@ def is_colliding(piece, pos):
 
 
 def draw_start_menu(screen):
-    screen.fill(tuple(map(lambda x: x * 1.7, BG_COLOR)))
+    screen.fill(tuple(map(lambda x: x * 1.7, analysis.BG_COLOR)))
     font = pygame.font.SysFont('poppins', 40)
     font.set_bold(True)
     gl = pygame.image.load("./assets/logo.png").convert_alpha()
-    game_logo = pygame.transform.scale(gl, (SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.2792862684 * 0.8))
-    screen.blit(game_logo, (SCREEN_WIDTH / 2 * 0.2, SCREEN_HEIGHT * 0.1))
+    game_logo = pygame.transform.scale(gl, (analysis.SCREEN_WIDTH * 0.8, analysis.SCREEN_WIDTH * 0.2792862684 * 0.8))
+    screen.blit(game_logo, (analysis.SCREEN_WIDTH / 2 * 0.2, analysis.SCREEN_HEIGHT * 0.1))
     start_button = font.render('PRESS SPACE TO PLAY (HUMAN)', True, (255, 255, 255))
     screen.blit(start_button,
-                (SCREEN_WIDTH / 2 - start_button.get_width() / 2, SCREEN_HEIGHT * 0.45 + start_button.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - start_button.get_width() / 2, analysis.SCREEN_HEIGHT * 0.45 + start_button.get_height() / 2))
     start_button = font.render('PRESS C TO PLAY (COMPUTER)', True, (255, 255, 255))
     screen.blit(start_button,
-                (SCREEN_WIDTH / 2 - start_button.get_width() / 2, SCREEN_HEIGHT * 0.60 + start_button.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - start_button.get_width() / 2, analysis.SCREEN_HEIGHT * 0.60 + start_button.get_height() / 2))
     quit_button = font.render('PRESS ESCAPE TO QUIT', True, (255, 255, 255))
     screen.blit(quit_button,
-                (SCREEN_WIDTH / 2 - quit_button.get_width() / 2, SCREEN_HEIGHT * 0.75 + quit_button.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - quit_button.get_width() / 2, analysis.SCREEN_HEIGHT * 0.75 + quit_button.get_height() / 2))
     pygame.display.update()
 
 
 def draw_difficulties(screen):
-    screen.fill(BG_COLOR)
+    screen.fill(analysis.BG_COLOR)
     font = pygame.font.SysFont('poppins', 40)
     font.set_bold(True)
     title = font.render('CHOOSE AN OPTION', True, (255, 255, 255))
@@ -56,19 +44,19 @@ def draw_difficulties(screen):
     hard = font.render('3: HARD', True, (255, 255, 255))
 
     screen.blit(title,
-                (SCREEN_WIDTH / 2 - title.get_width() / 2, SCREEN_HEIGHT * 0.15 + title.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - title.get_width() / 2, analysis.SCREEN_HEIGHT * 0.15 + title.get_height() / 2))
     screen.blit(easy,
-                (SCREEN_WIDTH / 2 - easy.get_width() / 2, SCREEN_HEIGHT * 0.25 + easy.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - easy.get_width() / 2, analysis.SCREEN_HEIGHT * 0.25 + easy.get_height() / 2))
     screen.blit(medium,
-                (SCREEN_WIDTH / 2 - medium.get_width() / 2, SCREEN_HEIGHT * 0.35 + medium.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - medium.get_width() / 2, analysis.SCREEN_HEIGHT * 0.35 + medium.get_height() / 2))
     screen.blit(hard,
-                (SCREEN_WIDTH / 2 - hard.get_width() / 2, SCREEN_HEIGHT * 0.45 + hard.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - hard.get_width() / 2, analysis.SCREEN_HEIGHT * 0.45 + hard.get_height() / 2))
 
     pygame.display.update()
 
 
 def draw_algos(screen):
-    screen.fill(BG_COLOR)
+    screen.fill(analysis.BG_COLOR)
     font = pygame.font.SysFont('poppins', 40)
     font.set_bold(True)
     title = font.render('CHOOSE AN OPTION', True, (255, 255, 255))
@@ -80,24 +68,24 @@ def draw_algos(screen):
     w_a_star = font.render('6: WEIGHTED A*', True, (255, 255, 255))
 
     screen.blit(title,
-                (SCREEN_WIDTH / 2 - title.get_width() / 2, SCREEN_HEIGHT * 0.15 + title.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - title.get_width() / 2, analysis.SCREEN_HEIGHT * 0.15 + title.get_height() / 2))
     screen.blit(bfs,
-                (SCREEN_WIDTH / 2 - bfs.get_width() / 2, SCREEN_HEIGHT * 0.25 + bfs.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - bfs.get_width() / 2, analysis.SCREEN_HEIGHT * 0.25 + bfs.get_height() / 2))
     screen.blit(dfs,
-                (SCREEN_WIDTH / 2 - dfs.get_width() / 2, SCREEN_HEIGHT * 0.35 + dfs.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - dfs.get_width() / 2, analysis.SCREEN_HEIGHT * 0.35 + dfs.get_height() / 2))
     screen.blit(ids,
-                (SCREEN_WIDTH / 2 - ids.get_width() / 2, SCREEN_HEIGHT * 0.45 + ids.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - ids.get_width() / 2, analysis.SCREEN_HEIGHT * 0.45 + ids.get_height() / 2))
     screen.blit(greedy,
-                (SCREEN_WIDTH / 2 - greedy.get_width() / 2, SCREEN_HEIGHT * 0.55 + greedy.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - greedy.get_width() / 2, analysis.SCREEN_HEIGHT * 0.55 + greedy.get_height() / 2))
     screen.blit(a_star,
-                (SCREEN_WIDTH / 2 - a_star.get_width() / 2, SCREEN_HEIGHT * 0.65 + a_star.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - a_star.get_width() / 2, analysis.SCREEN_HEIGHT * 0.65 + a_star.get_height() / 2))
     screen.blit(w_a_star,
-                (SCREEN_WIDTH / 2 - w_a_star.get_width() / 2, SCREEN_HEIGHT * 0.75 + w_a_star.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - w_a_star.get_width() / 2, analysis.SCREEN_HEIGHT * 0.75 + w_a_star.get_height() / 2))
     pygame.display.update()
 
 
 def draw_heuristics(screen):
-    screen.fill(BG_COLOR)
+    screen.fill(analysis.BG_COLOR)
     font = pygame.font.SysFont('poppins', 40)
     font.set_bold(True)
     title = font.render('CHOOSE AN OPTION', True, (255, 255, 255))
@@ -111,55 +99,55 @@ def draw_heuristics(screen):
     h8 = font.render('8: HEURISTIC 8', True, (255, 255, 255))
 
     screen.blit(title,
-                (SCREEN_WIDTH / 2 - title.get_width() / 2, SCREEN_HEIGHT * 0.15 + title.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - title.get_width() / 2, analysis.SCREEN_HEIGHT * 0.05 + title.get_height() / 2))
     screen.blit(h1,
-                (SCREEN_WIDTH / 2 - h1.get_width() / 2, SCREEN_HEIGHT * 0.25 + h1.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - h1.get_width() / 2, analysis.SCREEN_HEIGHT * 0.15 + h1.get_height() / 2))
     screen.blit(h2,
-                (SCREEN_WIDTH / 2 - h2.get_width() / 2, SCREEN_HEIGHT * 0.35 + h2.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - h2.get_width() / 2, analysis.SCREEN_HEIGHT * 0.25 + h2.get_height() / 2))
     screen.blit(h3,
-                (SCREEN_WIDTH / 2 - h3.get_width() / 2, SCREEN_HEIGHT * 0.45 + h3.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - h3.get_width() / 2, analysis.SCREEN_HEIGHT * 0.35 + h3.get_height() / 2))
     screen.blit(h4,
-                (SCREEN_WIDTH / 2 - h4.get_width() / 2, SCREEN_HEIGHT * 0.55 + h4.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - h4.get_width() / 2, analysis.SCREEN_HEIGHT * 0.45 + h4.get_height() / 2))
     screen.blit(h5,
-                (SCREEN_WIDTH / 2 - h5.get_width() / 2, SCREEN_HEIGHT * 0.65 + h5.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - h5.get_width() / 2, analysis.SCREEN_HEIGHT * 0.55 + h5.get_height() / 2))
     screen.blit(h6,
-                (SCREEN_WIDTH / 2 - h6.get_width() / 2, SCREEN_HEIGHT * 0.75 + h6.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - h6.get_width() / 2, analysis.SCREEN_HEIGHT * 0.65 + h6.get_height() / 2))
     screen.blit(h7,
-                (SCREEN_WIDTH / 2 - h7.get_width() / 2, SCREEN_HEIGHT * 0.75 + h7.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - h7.get_width() / 2, analysis.SCREEN_HEIGHT * 0.75 + h7.get_height() / 2))
     screen.blit(h8,
-                (SCREEN_WIDTH / 2 - h8.get_width() / 2, SCREEN_HEIGHT * 0.85 + h8.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - h8.get_width() / 2, analysis.SCREEN_HEIGHT * 0.85 + h8.get_height() / 2))
     pygame.display.update()
 
 
 def draw_end_screen(screen, puzzle):
-    screen.fill(BG_COLOR)
+    screen.fill(analysis.BG_COLOR)
     hint_button(screen)
-    pygame.draw.rect(screen, GAME_BACKGROUND_COLOR,
-                     pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE),
+    pygame.draw.rect(screen, analysis.GAME_BACKGROUND_COLOR,
+                     pygame.Rect(analysis.GAME_WIDTH_START, analysis.GAME_HEIGHT_START, analysis.GAME_WIDTH_SIZE, analysis.GAME_HEIGHT_SIZE),
                      border_radius=5)
     puzzle.drawPieces(screen)
 
-    end_screen = pygame.Surface((SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20), pygame.SRCALPHA)
+    end_screen = pygame.Surface((analysis.SCREEN_WIDTH - 20, analysis.SCREEN_HEIGHT - 20), pygame.SRCALPHA)
     end_screen.fill((0, 0, 0, 150))
     screen.blit(end_screen, (10, 10))
     font = pygame.font.SysFont('poppins', 40)
     font.set_bold(True)
     game_over_info = font.render('YOU WIN!', True, (255, 255, 255))
     screen.blit(game_over_info,
-                (SCREEN_WIDTH / 2 - game_over_info.get_width() / 2,
+                (analysis.SCREEN_WIDTH / 2 - game_over_info.get_width() / 2,
                  50))
     score = font.render(f'MOVES MADE: {puzzle.getMoves()}', True, (255, 255, 255))
     screen.blit(score,
-                (SCREEN_WIDTH / 2 - score.get_width() / 2,
+                (analysis.SCREEN_WIDTH / 2 - score.get_width() / 2,
                  100))
     main_menu_button = font.render('PRESS "M" TO RETURN TO THE MENU', True, (255, 255, 255))
     screen.blit(main_menu_button,
-                (SCREEN_WIDTH / 2 - main_menu_button.get_width() / 2,
-                 SCREEN_HEIGHT * 0.4 + main_menu_button.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - main_menu_button.get_width() / 2,
+                 analysis.SCREEN_HEIGHT * 0.4 + main_menu_button.get_height() / 2))
     quit_button = font.render('PRESS ESCAPE TO QUIT', True, (255, 255, 255))
     screen.blit(quit_button,
-                (SCREEN_WIDTH / 2 - quit_button.get_width() / 2,
-                 SCREEN_HEIGHT * 0.70 + quit_button.get_height() / 2))
+                (analysis.SCREEN_WIDTH / 2 - quit_button.get_width() / 2,
+                 analysis.SCREEN_HEIGHT * 0.70 + quit_button.get_height() / 2))
     pygame.display.flip()
     pygame.display.update()
 
@@ -168,12 +156,12 @@ def draw_moves(screen, moves):
     font = pygame.font.SysFont('poppins', 40)
     moves = font.render(F'MOVES: {moves}', True, (255, 255, 255))
     screen.blit(moves,
-                (SCREEN_WIDTH / 2 - moves.get_width() / 2, 20))
+                (analysis.SCREEN_WIDTH / 2 - moves.get_width() / 2, 20))
 
 
 def hint_button(screen):
     hint_image = pygame.image.load('assets/hint.png')
-    image_position = (SCREEN_WIDTH / 2 - hint_image.get_width() / 2, 770)
+    image_position = (analysis.SCREEN_WIDTH / 2 - hint_image.get_width() / 2, 770)
     scaled_image = pygame.transform.scale(hint_image,
                                           (hint_image.get_width() / 9, hint_image.get_height() / 9))
     border_surface = pygame.Surface((scaled_image.get_width() + 10, scaled_image.get_height() + 10), pygame.SRCALPHA)
@@ -201,7 +189,7 @@ def main_loop():
     last_row = None
     moving_piece_index = None
     hint_rect = None
-    puzzle = main.medium_map()
+    puzzle = analysis.medium_map()
     game_state = 'main_menu'
     first_click = True
     path = None
@@ -236,12 +224,12 @@ def main_loop():
                 # Change when more levels are implemented
                 if keys[pygame.K_1]:
                     game_state = 'playing_human'
-                    puzzle = main.easy_map()
+                    puzzle = analysis.easy_map()
                 elif keys[pygame.K_2]:
-                    puzzle = main.medium_map()
+                    puzzle = analysis.medium_map()
                     game_state = 'playing_human'
                 elif keys[pygame.K_3]:
-                    puzzle = main.hard_map()
+                    puzzle = analysis.hard_map()
                     game_state = 'playing_human'
 
             elif game_state == "choose_diff_computer":
@@ -251,12 +239,12 @@ def main_loop():
                 # Change when more levels are implemented
                 if keys[pygame.K_1]:
                     game_state = 'choose_algo'
-                    puzzle = main.easy_map()
+                    puzzle = analysis.easy_map()
                 elif keys[pygame.K_2]:
-                    puzzle = main.medium_map()
+                    puzzle = analysis.medium_map()
                     game_state = 'choose_algo'
                 elif keys[pygame.K_3]:
-                    puzzle = main.hard_map()
+                    puzzle = analysis.hard_map()
                     game_state = 'choose_algo'
 
             elif game_state == "choose_algo":
@@ -266,27 +254,27 @@ def main_loop():
                     if event.key == pygame.K_1:
                         game_state = 'playing_computer'
                         informed = False
-                        algo = main.breadth_first_search
+                        algo = analysis.breadth_first_search
                     elif event.key == pygame.K_2:
                         game_state = 'playing_computer'
                         informed = False
-                        algo = main.depth_first_search
+                        algo = analysis.depth_first_search
                     elif event.key == pygame.K_3:
                         game_state = 'playing_computer'
                         informed = False
-                        algo = main.iterative_deepening_search
+                        algo = analysis.iterative_deepening_search
                     elif event.key == pygame.K_4:
                         game_state = 'choose_heu'
                         informed = True
-                        algo = main.greedy_search
+                        algo = analysis.greedy_search
                     elif event.key == pygame.K_5:
                         game_state = 'choose_heu'
                         informed = True
-                        algo = main.a_star_search
+                        algo = analysis.a_star_search
                     elif event.key == pygame.K_6:
                         game_state = 'choose_heu'
                         informed = True
-                        algo = main.weighted_a_star_search
+                        algo = analysis.weighted_a_star_search
 
             elif game_state == "choose_heu":
                 draw_heuristics(screen)
@@ -294,35 +282,35 @@ def main_loop():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_1:
                         game_state = 'playing_computer'
-                        heuristic = main.h1
+                        heuristic = analysis.h1
                     elif event.key == pygame.K_2:
                         game_state = 'playing_computer'
-                        heuristic = main.h2
+                        heuristic = analysis.h2
                     elif event.key == pygame.K_3:
                         game_state = 'playing_computer'
-                        heuristic = main.h3
+                        heuristic = analysis.h3
                     elif event.key == pygame.K_4:
                         game_state = 'playing_computer'
-                        heuristic = main.h4
+                        heuristic = analysis.h4
                     elif event.key == pygame.K_5:
                         game_state = 'playing_computer'
-                        heuristic = main.h5
+                        heuristic = analysis.h5
                     elif event.key == pygame.K_6:
                         game_state = 'playing_computer'
-                        heuristic = main.h6
+                        heuristic = analysis.h6
                     elif event.key == pygame.K_7:
                         game_state = 'playing_computer'
-                        heuristic = main.h7
+                        heuristic = analysis.h7
                     elif event.key == pygame.K_8:
                         game_state = 'playing_computer'
-                        heuristic = main.h8
+                        heuristic = analysis.h8
             elif game_state == "playing_computer":
                 if not informed:
-                    sol = algo(puzzle, main.gameOver, main.get_child_states)
+                    sol = algo(puzzle, analysis.gameOver, analysis.get_child_states)
                 else:
-                    sol = algo(puzzle, main.gameOver, main.get_child_states, heuristic)
-                path = main.get_solution_path(sol[0])
-                main.show_ai_path(path)
+                    sol = algo(puzzle, analysis.gameOver, analysis.get_child_states, heuristic)
+                path = analysis.get_solution_path(sol[0])
+                show_ai_path(path)
 
                 game_state = "main_menu"
 
@@ -332,13 +320,13 @@ def main_loop():
                         start_pos = pygame.mouse.get_pos()
                         if hint_rect.collidepoint(start_pos):
                             if first_click:
-                                sol = main.weighted_a_star_search(puzzle, main.gameOver, main.get_child_states, main.h4)
-                                path = main.get_solution_path(sol[0])
-                                main.movedPiece(path[0], path[1]).toggle_highlight()
+                                sol = analysis.weighted_a_star_search(puzzle, analysis.gameOver, analysis.get_child_states, analysis.h4)
+                                path = analysis.get_solution_path(sol[0])
+                                analysis.movedPiece(path[0], path[1]).toggle_highlight()
                                 first_click = False
 
                             else:
-                                if main.gameOver(path[1]):
+                                if analysis.gameOver(path[1]):
                                     puzzle.move_piece_delta(puzzle.objectivePiece.id, 0, 3)
                                     game_state = "end_screen"
                                 else:
@@ -368,7 +356,7 @@ def main_loop():
                         puzzle.move_piece_delta(moving_piece_index, new_col - last_col, new_row - last_row)
                         puzzle.getPiece(moving_piece_index).toggle_highlight()
                         start_pos = None
-                        if main.gameOver(puzzle):
+                        if analysis.gameOver(puzzle):
                             puzzle.move_piece_delta(moving_piece_index, 0, 3)
                             game_state = "end_screen"
                         moving_piece_index = None
@@ -384,9 +372,9 @@ def main_loop():
                     last_col += delta_col
                     last_row += delta_row
 
-                screen.fill(BG_COLOR)
-                pygame.draw.rect(screen, GAME_BACKGROUND_COLOR,
-                                 pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE),
+                screen.fill(analysis.BG_COLOR)
+                pygame.draw.rect(screen, analysis.GAME_BACKGROUND_COLOR,
+                                 pygame.Rect(analysis.GAME_WIDTH_START, analysis.GAME_HEIGHT_START, analysis.GAME_WIDTH_SIZE, analysis.GAME_HEIGHT_SIZE),
                                  border_radius=5)
                 pieces = puzzle.drawPieces(screen)
                 draw_moves(screen, puzzle.getMoves())
@@ -401,7 +389,7 @@ def main_loop():
                     last_col = None
                     last_row = None
                     moving_piece_index = None
-                    puzzle = main.easy_map()
+                    puzzle = analysis.easy_map()
                     game_over = False
 
 
@@ -409,9 +397,9 @@ def show_ai_path(path):
     screen = pygame_init()
     moves = 0
     for step in path:
-        screen.fill(BG_COLOR)
-        pygame.draw.rect(screen, GAME_BACKGROUND_COLOR,
-                         pygame.Rect(GAME_WIDTH_START, GAME_HEIGHT_START, GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE),
+        screen.fill(analysis.BG_COLOR)
+        pygame.draw.rect(screen, analysis.GAME_BACKGROUND_COLOR,
+                         pygame.Rect(analysis.GAME_WIDTH_START, analysis.GAME_HEIGHT_START, analysis.GAME_WIDTH_SIZE, analysis.GAME_HEIGHT_SIZE),
                          border_radius=5)
         step.drawPieces(screen)
         draw_moves(screen, moves)

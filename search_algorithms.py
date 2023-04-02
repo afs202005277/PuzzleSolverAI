@@ -1,6 +1,6 @@
 import heapq
 from collections import deque
-import main
+import heuristics
 
 
 class TreeNode:
@@ -193,6 +193,6 @@ def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
 
 
 def weighted_a_star_search(initial_state, goal_state_func, operators_func, heuristic):
-    w = main.h1
+    w = heuristics.h1
     return a_star_search(initial_state, goal_state_func, operators_func,
                          lambda x, y: (heuristic(x, y) + w(x, None)) / 2)
