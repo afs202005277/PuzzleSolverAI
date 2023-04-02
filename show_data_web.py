@@ -1,13 +1,9 @@
 import dash
 from dash import dcc, html
 import plotly.graph_objs as go
-import pandas as pd
 
-# create a sample data frame
-df = pd.DataFrame({'x': [1, 2, 3, 4], 'y': [4, 2, 3, 1]})
 
 def show_data(algorithms, heuristics):
-    # create the Dash app
     app = dash.Dash()
 
     graphs = []
@@ -69,6 +65,5 @@ def show_data(algorithms, heuristics):
 
                 graphs.append(g)
 
-    # define the layout of the app
-    app.layout = html.Div(children=[html.H1(children='AI Search Algorithms')]+graphs)
+    app.layout = html.Div(children=[html.H1(children='AI Search Algorithms')] + graphs)
     return app

@@ -66,6 +66,7 @@ def draw_difficulties(screen):
 
     pygame.display.update()
 
+
 def draw_algos(screen):
     screen.fill(BG_COLOR)
     font = pygame.font.SysFont('poppins', 40)
@@ -93,6 +94,7 @@ def draw_algos(screen):
     screen.blit(w_a_star,
                 (SCREEN_WIDTH / 2 - w_a_star.get_width() / 2, SCREEN_HEIGHT * 0.75 + w_a_star.get_height() / 2))
     pygame.display.update()
+
 
 def draw_heuristics(screen):
     screen.fill(BG_COLOR)
@@ -127,6 +129,8 @@ def draw_heuristics(screen):
     screen.blit(h8,
                 (SCREEN_WIDTH / 2 - h8.get_width() / 2, SCREEN_HEIGHT * 0.85 + h8.get_height() / 2))
     pygame.display.update()
+
+
 def draw_end_screen(screen, puzzle):
     screen.fill(BG_COLOR)
     hint_button(screen)
@@ -166,6 +170,7 @@ def draw_moves(screen, moves):
     screen.blit(moves,
                 (SCREEN_WIDTH / 2 - moves.get_width() / 2, 20))
 
+
 def hint_button(screen):
     hint_image = pygame.image.load('assets/hint.png')
     image_position = (SCREEN_WIDTH / 2 - hint_image.get_width() / 2, 770)
@@ -204,7 +209,6 @@ def main_loop():
     informed = None
     heuristic = None
 
-    # Game Loop (temporary)
     running = True
     while running:
         for event in pygame.event.get():
@@ -264,13 +268,13 @@ def main_loop():
                         informed = False
                         algo = main.breadth_first_search
                     elif event.key == pygame.K_2:
-                            game_state = 'playing_computer'
-                            informed = False
-                            algo = main.depth_first_search
+                        game_state = 'playing_computer'
+                        informed = False
+                        algo = main.depth_first_search
                     elif event.key == pygame.K_3:
-                            game_state = 'playing_computer'
-                            informed = False
-                            algo = main.iterative_deepening_search
+                        game_state = 'playing_computer'
+                        informed = False
+                        algo = main.iterative_deepening_search
                     elif event.key == pygame.K_4:
                         game_state = 'choose_heu'
                         informed = True
@@ -312,8 +316,6 @@ def main_loop():
                     elif event.key == pygame.K_8:
                         game_state = 'playing_computer'
                         heuristic = main.h8
-
-
             elif game_state == "playing_computer":
                 if not informed:
                     sol = algo(puzzle, main.gameOver, main.get_child_states)
