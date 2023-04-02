@@ -4,7 +4,25 @@ from search_algorithms import *
 from heuristics import *
 import time
 
+"""
+This code block contains the code which compares the performance of different search strategies and heuristics on different levels of a game. Here's what it does:
 
+Defines three dictionaries: 
+- uninformed_search contains the different uninformed search algorithms to be tested
+- informed_search contains the different informed search algorithms to be tested
+- heuristics contains the different heuristics to be used
+
+Defines a dictionary levels containing different levels of the game.
+Defines two dictionaries: 
+- optimal_solutions will store the optimal solutions for each level
+- statistics will store the statistics of the search algorithms for each level
+Loops over each level and each uninformed search strategy: for each combination, it measures the time it takes to find a solution, the number of nodes expanded, the number of iterations performed, and the relative error (difference between the found solution and the optimal solution, divided by the optimal solution).
+Loops over each level and each informed search strategy and heuristic: for each combination, it measures the time it takes to find a solution, the number of nodes expanded, the number of iterations performed, and the relative error.
+Displays the statistics in a web page using the show_data module.
+Overall, the program compares the performance of different search algorithms and heuristics on different levels of a game. 
+It measures the time it takes to find a solution, the number of nodes expanded, the number of iterations performed, and the relative error. 
+Finally, it displays the results in a web application.
+"""
 if __name__ == '__main__':
     uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
     informed_search = {"Greedy": greedy_search, "A* search": a_star_search,
