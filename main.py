@@ -166,10 +166,6 @@ class Puzzle:
     def getPiece(self, index):
         return self.pieces[index]
 
-    def add_piece(self, size, orientation, x, y):
-        piece = Piece(size, orientation, x, y)
-        self.pieces.append(piece)
-
     def move_piece(self, index, newX, newY):
         if self.is_valid_move(index, newX, newY):
             self.pieces[index].col_idx = newX
@@ -228,9 +224,6 @@ class Puzzle:
         for i in range(self.exit_x + self.exit_width, self.numCols):
             representation[self.exit_y][i] = '-'
         return representation
-
-    def show_gui(self):
-        print("TO BE DONE")
 
     def drawPieces(self, screen):
         pieces = []
@@ -418,6 +411,7 @@ def h8(puzzle, index):
     # prioritize moving the smallest pieces first
     return -h7(puzzle, index)
 
+
 def movedPiece(puzzle1, puzzle2):
     for i in range(len(puzzle1.pieces)):
         if puzzle1.pieces[i] != puzzle2.pieces[i]:
@@ -453,10 +447,10 @@ def gameOver(puzzle):
     return puzzle.isGameOver
 
 
-import sys
 if __name__ == '__main__':
     uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
-    informed_search = {"Greedy": greedy_search, "A* search": a_star_search, "Weighted A* search": weighted_a_star_search}
+    informed_search = {"Greedy": greedy_search, "A* search": a_star_search,
+                       "Weighted A* search": weighted_a_star_search}
     heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
     levels = {'easy': easy_map(), 'medium': medium_map(),'hard': hard_map()}
     optimal_solutions = dict()

@@ -158,6 +158,7 @@ def greedy_search(initial_state, goal_state_func, operators_func, heuristic):
                 visited.add(state)
     return None
 
+
 def a_star_search(initial_state, goal_state_func, operators_func, heuristic):
     setattr(TreeNode, "__lt__",
             lambda self, other: h_a_star(self, heuristic, self.moved_piece) < h_a_star(other, heuristic,
