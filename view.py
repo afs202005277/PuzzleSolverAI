@@ -4,6 +4,11 @@ import pygame
 import analysis
 
 
+'''
+Initializes pygame and creates the game window.
+
+Returns the game window surface.
+'''
 def pygame_init():
     pygame.init()
     screen = pygame.display.set_mode((analysis.SCREEN_WIDTH, analysis.SCREEN_HEIGHT))
@@ -11,10 +16,25 @@ def pygame_init():
     return screen
 
 
+'''
+Determines whether a point is colliding with a given piece.
+
+Arguments:
+piece: The piece to check collision with.
+pos: The position to check collision at.
+
+Returns true if the point collides with the piece, False otherwise.
+'''
 def is_colliding(piece, pos):
     return piece.collidepoint(pos[0], pos[1])
 
 
+'''
+Draws the start menu on the game.
+
+Arguments:
+screen: The game screen to draw on.
+'''
 def draw_start_menu(screen):
     screen.fill(tuple(map(lambda x: x * 1.7, analysis.BG_COLOR)))
     font = pygame.font.SysFont('poppins', 40)
@@ -34,6 +54,12 @@ def draw_start_menu(screen):
     pygame.display.update()
 
 
+'''
+Draws the difficulties selection menu.
+
+Arguments:
+screen: The game screen to draw on.
+'''
 def draw_difficulties(screen):
     screen.fill(analysis.BG_COLOR)
     font = pygame.font.SysFont('poppins', 40)
@@ -55,6 +81,12 @@ def draw_difficulties(screen):
     pygame.display.update()
 
 
+'''
+Draws the algorithms selection menu.
+
+Arguments:
+screen: The game screen to draw on.
+'''
 def draw_algos(screen):
     screen.fill(analysis.BG_COLOR)
     font = pygame.font.SysFont('poppins', 40)
@@ -84,6 +116,12 @@ def draw_algos(screen):
     pygame.display.update()
 
 
+"""
+Draw the heuristics menu.
+
+Arguments:
+screen: The game screen to draw on.
+"""
 def draw_heuristics(screen):
     screen.fill(analysis.BG_COLOR)
     font = pygame.font.SysFont('poppins', 40)
@@ -119,6 +157,13 @@ def draw_heuristics(screen):
     pygame.display.update()
 
 
+"""
+Draw the end game screen.
+
+Arguments:
+screen: The game screen to draw on.
+puzzle: The instance of the Puzzle class representing the puzzle that was just completed.
+"""
 def draw_end_screen(screen, puzzle):
     screen.fill(analysis.BG_COLOR)
     hint_button(screen)
@@ -152,6 +197,13 @@ def draw_end_screen(screen, puzzle):
     pygame.display.update()
 
 
+"""
+Draw the number of moves made on the screen.
+
+Arguments:
+screen: The game screen to draw on.
+moves: The number of moves made.
+"""
 def draw_moves(screen, moves):
     font = pygame.font.SysFont('poppins', 40)
     moves = font.render(F'MOVES: {moves}', True, (255, 255, 255))
@@ -159,6 +211,12 @@ def draw_moves(screen, moves):
                 (analysis.SCREEN_WIDTH / 2 - moves.get_width() / 2, 20))
 
 
+"""
+Draw the hint button on the screen.
+
+Arguments:
+screen: The game screen to draw on.
+"""
 def hint_button(screen):
     hint_image = pygame.image.load('assets/hint.png')
     image_position = (analysis.SCREEN_WIDTH / 2 - hint_image.get_width() / 2, 770)
@@ -183,216 +241,12 @@ def hint_button(screen):
     return image_rect
 
 
-def main_loop():
-    screen = pygame_init()
-    last_col = None
-    last_row = None
-    moving_piece_index = None
-    hint_rect = None
-    puzzle = analysis.medium_map()
-    game_state = 'main_menu'
-    first_click = True
-    path = None
-    algo = None
-    informed = None
-    heuristic = None
+"""
+Displays the path to get to the solution.
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-
-            if game_state == 'main_menu':
-                draw_start_menu(screen)
-
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_c]:
-                    game_state = 'choose_diff_computer'
-                    game_over = False
-                if keys[pygame.K_SPACE]:
-                    game_state = 'choose_diff_human'
-                    game_over = False
-
-            if game_state == 'choose_diff_human':
-                draw_difficulties(screen)
-
-                keys = pygame.key.get_pressed()
-                # Change when more levels are implemented
-                if keys[pygame.K_1]:
-                    game_state = 'playing_human'
-                    puzzle = analysis.easy_map()
-                elif keys[pygame.K_2]:
-                    puzzle = analysis.medium_map()
-                    game_state = 'playing_human'
-                elif keys[pygame.K_3]:
-                    puzzle = analysis.hard_map()
-                    game_state = 'playing_human'
-
-            elif game_state == "choose_diff_computer":
-                draw_difficulties(screen)
-
-                keys = pygame.key.get_pressed()
-                # Change when more levels are implemented
-                if keys[pygame.K_1]:
-                    game_state = 'choose_algo'
-                    puzzle = analysis.easy_map()
-                elif keys[pygame.K_2]:
-                    puzzle = analysis.medium_map()
-                    game_state = 'choose_algo'
-                elif keys[pygame.K_3]:
-                    puzzle = analysis.hard_map()
-                    game_state = 'choose_algo'
-
-            elif game_state == "choose_algo":
-                draw_algos(screen)
-
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_1:
-                        game_state = 'playing_computer'
-                        informed = False
-                        algo = analysis.breadth_first_search
-                    elif event.key == pygame.K_2:
-                        game_state = 'playing_computer'
-                        informed = False
-                        algo = analysis.depth_first_search
-                    elif event.key == pygame.K_3:
-                        game_state = 'playing_computer'
-                        informed = False
-                        algo = analysis.iterative_deepening_search
-                    elif event.key == pygame.K_4:
-                        game_state = 'choose_heu'
-                        informed = True
-                        algo = analysis.greedy_search
-                    elif event.key == pygame.K_5:
-                        game_state = 'choose_heu'
-                        informed = True
-                        algo = analysis.a_star_search
-                    elif event.key == pygame.K_6:
-                        game_state = 'choose_heu'
-                        informed = True
-                        algo = analysis.weighted_a_star_search
-
-            elif game_state == "choose_heu":
-                draw_heuristics(screen)
-
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_1:
-                        game_state = 'playing_computer'
-                        heuristic = analysis.h1
-                    elif event.key == pygame.K_2:
-                        game_state = 'playing_computer'
-                        heuristic = analysis.h2
-                    elif event.key == pygame.K_3:
-                        game_state = 'playing_computer'
-                        heuristic = analysis.h3
-                    elif event.key == pygame.K_4:
-                        game_state = 'playing_computer'
-                        heuristic = analysis.h4
-                    elif event.key == pygame.K_5:
-                        game_state = 'playing_computer'
-                        heuristic = analysis.h5
-                    elif event.key == pygame.K_6:
-                        game_state = 'playing_computer'
-                        heuristic = analysis.h6
-                    elif event.key == pygame.K_7:
-                        game_state = 'playing_computer'
-                        heuristic = analysis.h7
-                    elif event.key == pygame.K_8:
-                        game_state = 'playing_computer'
-                        heuristic = analysis.h8
-            elif game_state == "playing_computer":
-                if not informed:
-                    sol = algo(puzzle, analysis.gameOver, analysis.get_child_states)
-                else:
-                    sol = algo(puzzle, analysis.gameOver, analysis.get_child_states, heuristic)
-                path = analysis.get_solution_path(sol[0])
-                show_ai_path(path)
-
-                game_state = "main_menu"
-
-            elif game_state == 'playing_human':
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == pygame.BUTTON_LEFT:
-                        start_pos = pygame.mouse.get_pos()
-                        if hint_rect.collidepoint(start_pos):
-                            if first_click:
-                                sol = analysis.weighted_a_star_search(puzzle, analysis.gameOver, analysis.get_child_states, analysis.h4)
-                                path = analysis.get_solution_path(sol[0])
-                                analysis.movedPiece(path[0], path[1]).toggle_highlight()
-                                first_click = False
-
-                            else:
-                                if analysis.gameOver(path[1]):
-                                    puzzle.move_piece_delta(puzzle.objectivePiece.id, 0, 3)
-                                    game_state = "end_screen"
-                                else:
-                                    puzzle = path[1]
-                                path = None
-                                first_click = True
-
-                        last_col = puzzle.getColIndex(start_pos[0])
-                        last_row = puzzle.getRowIndex(start_pos[1])
-                        tmp = [idx for idx, piece in enumerate(pieces) if is_colliding(piece, start_pos)]
-                        if len(tmp) == 1:
-                            moving_piece_index = tmp[0]
-                            if not first_click:
-                                puzzle.getPiece(moving_piece_index).toggle_highlight(True)
-                            else:
-                                puzzle.getPiece(moving_piece_index).toggle_highlight()
-                            path = None
-                            first_click = True
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    if event.button == pygame.BUTTON_LEFT:
-                        if moving_piece_index is None:
-                            continue
-                        end_pos = pygame.mouse.get_pos()
-
-                        new_col = puzzle.getColIndex(end_pos[0])
-                        new_row = puzzle.getRowIndex(end_pos[1])
-                        puzzle.move_piece_delta(moving_piece_index, new_col - last_col, new_row - last_row)
-                        puzzle.getPiece(moving_piece_index).toggle_highlight()
-                        start_pos = None
-                        if analysis.gameOver(puzzle):
-                            puzzle.move_piece_delta(moving_piece_index, 0, 3)
-                            game_state = "end_screen"
-                        moving_piece_index = None
-
-                if moving_piece_index is not None:
-                    current_pos = pygame.mouse.get_pos()
-
-                    new_col = puzzle.getColIndex(current_pos[0])
-                    new_row = puzzle.getRowIndex(current_pos[1])
-                    delta_col = new_col - last_col
-                    delta_row = new_row - last_row
-                    puzzle.move_piece_delta(moving_piece_index, delta_col, delta_row)
-                    last_col += delta_col
-                    last_row += delta_row
-
-                screen.fill(analysis.BG_COLOR)
-                pygame.draw.rect(screen, analysis.GAME_BACKGROUND_COLOR,
-                                 pygame.Rect(analysis.GAME_WIDTH_START, analysis.GAME_HEIGHT_START, analysis.GAME_WIDTH_SIZE, analysis.GAME_HEIGHT_SIZE),
-                                 border_radius=5)
-                pieces = puzzle.drawPieces(screen)
-                draw_moves(screen, puzzle.getMoves())
-                hint_rect = hint_button(screen)
-                pygame.display.flip()
-                pygame.display.update()
-            elif game_state == 'end_screen':
-                draw_end_screen(screen, puzzle)
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_m]:
-                    game_state = 'main_menu'
-                    last_col = None
-                    last_row = None
-                    moving_piece_index = None
-                    puzzle = analysis.easy_map()
-                    game_over = False
-
-
+Arguments:
+path: States path to the solution.
+"""
 def show_ai_path(path):
     screen = pygame_init()
     moves = 0
@@ -408,6 +262,3 @@ def show_ai_path(path):
         moves += 1
         sleep(1)
 
-
-if __name__ == '__main__':
-    main_loop()

@@ -27,6 +27,11 @@ OFFSET = 10
 BG_COLOR = (0, 51, 68)
 GAME_BACKGROUND_COLOR = (20, 58, 75)
 
+"""
+The Piece class represents a puzzle piece and stores information about its dimensions, position, 
+texture, and whether or not it is the objective piece.
+"""
+
 
 class Piece:
     def __init__(self, height, width, row_idx, col_idx, texture, isObjective=False):
@@ -50,6 +55,8 @@ class Piece:
     def __hash__(self):
         return hash((self.row_idx, self.col_idx, self.width, self.height))
 
+    # Toggles the highlight state of a grid cell. The force parameter forces the cell to highlight
+    # even if it was already
     def toggle_highlight(self, force=False):
         if force:
             if self.texture == BLUE:
@@ -86,6 +93,7 @@ class Piece:
 
             self.isHighlighted = True
 
+    # Returns a list of all the positions occupied by the grid cell.
     def get_occupied_positions(self):
         pos = []
         for delta_row in range(self.row_idx, self.row_idx + self.height):
@@ -93,10 +101,18 @@ class Piece:
                 pos.append((delta_col, delta_row))
         return pos
 
+    # Updates a text-based representation of the grid cell in a terminal user interface
     def show_tui(self, representation):
         positions = self.get_occupied_positions()
         for (x, y) in positions:
             representation[y][x] = self.id
+
+
+"""
+The Puzzle class represents the game board and manages the state of the game. 
+It contains a list of Piece objects and methods to move them around the board, check if a move is valid, 
+and check if the game is over.
+"""
 
 
 class Puzzle:
@@ -145,34 +161,41 @@ class Puzzle:
     def __hash__(self):
         return hash(self.pieces.__hash__)
 
+    # Returns the number of moves made so far.
     def getMoves(self):
         return self.moves
 
+    # Given a horizontal position posX, returns the index of the column it belongs to.
     def getColIndex(self, posX):
         for x in self.pos_x_to_index:
             if float(x) > posX:
                 return self.pos_x_to_index[x] - 1
         return -1
 
+    # Given a vertical position posY, returns the index of the row it belongs to.
     def getRowIndex(self, posY):
         for y in self.pos_y_to_index:
             if float(y) > posY:
                 return self.pos_y_to_index[y] - 1
         return -1
 
+    # Returns the objective piece of the puzzle.
     def get_objective_piece(self):
         for piece in self.pieces:
             if piece.isObjective:
                 return piece
 
+    # Returns the piece at the given index.
     def getPiece(self, index):
         return self.pieces[index]
 
+    # Tries to move the piece at the given index to the given position.
     def move_piece(self, index, newX, newY):
         if self.is_valid_move(index, newX, newY):
             self.pieces[index].col_idx = newX
             self.pieces[index].row_idx = newY
 
+    # Tries to move the piece at the given index by the given deltas in the column and row directions.
     def move_piece_delta(self, index, delta_col, delta_row):
         new_col_idx = min((self.pieces[index]).col_idx + delta_col, self.numCols - self.pieces[index].width)
         new_row_idx = min((self.pieces[index]).row_idx + delta_row, self.numRows - self.pieces[index].height)
@@ -197,13 +220,12 @@ class Puzzle:
         self.pieces[index].col_idx = new_col_idx
         self.pieces[index].row_idx = new_row_idx
 
+    # Checks whether moving the piece at the given index to the given position is valid.
     def is_valid_move(self, index, newX, newY):
         if index < 0 or index >= len(self.pieces):
-            # print("Invalid Piece")
             return False
         elif newX + self.pieces[index].width > self.numCols or newX < 0 or newY + self.pieces[
             index].height > self.numRows or newY < 0:
-            # print("Out of bounds")
             return False
         else:
             tmp_piece = deepcopy(self.pieces[index])
@@ -213,10 +235,10 @@ class Puzzle:
             for piece in self.pieces:
                 if piece.id != tmp_piece.id and any(
                         map(lambda x: x in occupied_positions, piece.get_occupied_positions())):
-                    # print("Invalid position")
                     return False
             return True
 
+    # Generates a text-based representation of the current state of the puzzle.
     def show_tui(self):
         representation = [[[] for _ in range(self.numCols)] for _ in range(self.numRows + 1)]
         for piece in self.pieces:
@@ -227,6 +249,7 @@ class Puzzle:
             representation[self.exit_y][i] = '-'
         return representation
 
+    # Draws the current state of the puzzle on the given screen.
     def drawPieces(self, screen):
         pieces = []
 
@@ -290,6 +313,7 @@ class Puzzle:
         return pieces
 
 
+# Creates the easy map
 def easy_map():
     pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
               Piece(2, 1, 2, 1, BLUE), Piece(2, 2, 2, 2, RED, True), Piece(1, 1, 4, 0, YELLOW),
@@ -300,6 +324,7 @@ def easy_map():
     return puzzle
 
 
+# Creates the medium map
 def medium_map():
     pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(1, 1, 0, 3, YELLOW), Piece(1, 1, 0, 2, YELLOW),
               Piece(2, 2, 2, 0, RED, True), Piece(2, 1, 1, 2, BLUE), Piece(2, 1, 1, 3, BLUE),
@@ -310,6 +335,7 @@ def medium_map():
     return puzzle
 
 
+# Creates the hard map
 def hard_map():
     pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 2, 0, 1, RED, True), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
               Piece(1, 1, 2, 1, YELLOW), Piece(1, 1, 3, 1, YELLOW), Piece(1, 1, 3, 2, YELLOW),
@@ -320,6 +346,7 @@ def hard_map():
     return puzzle
 
 
+# Move a piece
 def movedPiece(puzzle1, puzzle2):
     for i in range(len(puzzle1.pieces)):
         if puzzle1.pieces[i] != puzzle2.pieces[i]:
@@ -327,6 +354,7 @@ def movedPiece(puzzle1, puzzle2):
     return None
 
 
+# Move a piece (Computer)
 def move_piece_ai(puzzle, index, newX, newY):
     if puzzle.is_valid_move(index, newX, newY):
         res = deepcopy(puzzle)
@@ -336,7 +364,7 @@ def move_piece_ai(puzzle, index, newX, newY):
         return res
     return None
 
-
+# Gets the next puzzle states
 def get_child_states(puzzle):
     vectors = [(1, 0), (-1, 0), (0, 1), (0, -1)]
     res = []
@@ -348,6 +376,7 @@ def get_child_states(puzzle):
     return res
 
 
+# Checks whether the game has ended or not
 def gameOver(puzzle):
     heightRule = puzzle.objectivePiece.row_idx == puzzle.numRows - puzzle.objectivePiece.height
     widthRule = puzzle.objectivePiece.col_idx >= puzzle.exit_x and puzzle.objectivePiece.col_idx + puzzle.objectivePiece.width <= puzzle.exit_x + puzzle.exit_width
