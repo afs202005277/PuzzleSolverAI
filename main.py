@@ -1,4 +1,4 @@
-from time import sleep
+from view import *
 
 '''
 This code implements the main game loop for a sliding puzzle game. 
