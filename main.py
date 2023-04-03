@@ -1,516 +1,220 @@
-import show_data_web
-from view import *
-from copy import deepcopy
-import math
-from search_algorithms import *
-import time
-
-"""BLUE = [0, 0, 120]
-RED = [120, 0, 0]
-YELLOW = [120, 120, 0]"""
-HIGHLIGHT = 70
-ANIMATION_TIME = 10
-
-BLUE = "./assets/blue.png"
-BLUE_H = "./assets/blue_h.png"
-RED = "./assets/objective_cube.png"
-RED_H = "./assets/objective_cube_h.png"
-YELLOW = "./assets/yellow.png"
-YELLOW_H = "./assets/yellow_h.png"
-GREEN = "./assets/green.png"
-GREEN_H = "./assets/green_h.png"
-
-exit_image = pygame.image.load("./assets/exit.png")
-
-
-class Piece:
-    def __init__(self, height, width, row_idx, col_idx, texture, isObjective=False):
-        self.id = -1
-        self.height = height
-        self.width = width
-        self.row_idx = row_idx
-        self.col_idx = col_idx
-        self.texture = texture
-        self.color = (0, 0, 0, 0)
-        self.isObjective = isObjective
-        self.isHighlighted = False
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            statement = self.row_idx == other.row_idx and self.col_idx == other.col_idx \
-                        and self.width == other.width and self.height == other.height
-            return statement
-        return False
-
-    def __hash__(self):
-        return hash((self.row_idx, self.col_idx, self.width, self.height))
-
-    def toggle_highlight(self, force=False):
-        if force:
-            if self.texture == BLUE:
-                self.texture = BLUE_H
-            elif self.texture == YELLOW:
-                self.texture = YELLOW_H
-            elif self.texture == RED:
-                self.texture = RED_H
-            elif self.texture == GREEN:
-                self.texture = GREEN_H
-
-        elif self.isHighlighted:
-
-            if self.texture == BLUE_H:
-                self.texture = BLUE
-            elif self.texture == YELLOW_H:
-                self.texture = YELLOW
-            elif self.texture == RED_H:
-                self.texture = RED
-            elif self.texture == GREEN_H:
-                self.texture = GREEN
-
-            self.isHighlighted = False
-        else:
-
-            if self.texture == BLUE:
-                self.texture = BLUE_H
-            elif self.texture == YELLOW:
-                self.texture = YELLOW_H
-            elif self.texture == RED:
-                self.texture = RED_H
-            elif self.texture == GREEN:
-                self.texture = GREEN_H
-
-            self.isHighlighted = True
-
-    def get_occupied_positions(self):
-        pos = []
-        for delta_row in range(self.row_idx, self.row_idx + self.height):
-            for delta_col in range(self.col_idx, self.col_idx + self.width):
-                pos.append((delta_col, delta_row))
-        return pos
-
-    def show_tui(self, representation):
-        positions = self.get_occupied_positions()
-        for (x, y) in positions:
-            representation[y][x] = self.id
-
-    def show_gui(self):
-        print("TO BE DONE")
-
-
-class Puzzle:
-    def __init__(self, numRows, numCols, pieces=None, exit_x=1, exit_width=2):
-        if pieces is None:
-            pieces = []
-        self.numRows = numRows
-        self.numCols = numCols
-        self.pieces = pieces
-        self.exit_x = exit_x
-        self.exit_y = numRows
-        self.exit_width = exit_width
-        self.wSize = GAME_WIDTH_SIZE / self.numCols
-        self.hSize = GAME_HEIGHT_SIZE / self.numRows
-        self.pos_x_to_index = {}
-        self.pos_y_to_index = {}
-        self.animation = 0
-        self.movedPiece = None
-        self.objectivePiece = None
-        self.isGameOver = False
-        self.moves = 0
-
-        for idx, piece in enumerate(pieces):
-            piece.id = idx
-            if piece.isObjective:
-                self.objectivePiece = piece
-
-        for col in range(numCols):
-            min_pos = GAME_WIDTH_START + self.wSize * col
-            self.pos_x_to_index[f'{min_pos}'] = col
-        self.pos_x_to_index[f'{GAME_WIDTH_START + GAME_WIDTH_SIZE}'] = numCols
-
-        for row in range(numRows):
-            min_pos = GAME_HEIGHT_START + self.hSize * row
-            self.pos_y_to_index[f'{min_pos}'] = row
-        self.pos_y_to_index[f'{GAME_HEIGHT_START + GAME_HEIGHT_SIZE}'] = numRows
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__) and len(self.pieces) == len(other.pieces):
-            for i in range(len(self.pieces)):
-                if self.pieces[i] != other.pieces[i]:
-                    return False
-            return True
-        return False
-
-    def __hash__(self):
-        return hash(self.pieces.__hash__)
-
-    def getMoves(self):
-        return self.moves
-
-    def getColIndex(self, posX):
-        for x in self.pos_x_to_index:
-            if float(x) > posX:
-                return self.pos_x_to_index[x] - 1
-        return -1
-
-    def getRowIndex(self, posY):
-        for y in self.pos_y_to_index:
-            if float(y) > posY:
-                return self.pos_y_to_index[y] - 1
-        return -1
-
-    def get_objective_piece(self):
-        for piece in self.pieces:
-            if piece.isObjective:
-                return piece
-
-    def getPiece(self, index):
-        return self.pieces[index]
-
-    def move_piece(self, index, newX, newY):
-        if self.is_valid_move(index, newX, newY):
-            self.pieces[index].col_idx = newX
-            self.pieces[index].row_idx = newY
-
-    def move_piece_delta(self, index, delta_col, delta_row):
-        new_col_idx = min((self.pieces[index]).col_idx + delta_col, self.numCols - self.pieces[index].width)
-        new_row_idx = min((self.pieces[index]).row_idx + delta_row, self.numRows - self.pieces[index].height)
-
-        if not self.isGameOver and not self.is_valid_move(index, new_col_idx, new_row_idx):
-            return
-
-        if self.isGameOver:
-            new_row_idx = (self.pieces[index]).row_idx + delta_row
-
-        if delta_col != 0 or delta_row != 0:
-            self.animation = ANIMATION_TIME
-            incrementX = (new_col_idx * self.wSize - self.pieces[index].col_idx * self.wSize) / ANIMATION_TIME
-            incrementY = (new_row_idx * self.hSize - self.pieces[index].row_idx * self.hSize) / ANIMATION_TIME
-            self.movedPiece = [index, self.pieces[index].col_idx * self.wSize, self.pieces[index].row_idx * self.hSize,
-                               incrementX, incrementY]
-
-        if not self.isGameOver and (
-                self.pieces[index].col_idx != new_col_idx or self.pieces[index].row_idx != new_row_idx):
-            self.moves += 1
-
-        self.pieces[index].col_idx = new_col_idx
-        self.pieces[index].row_idx = new_row_idx
-
-    def is_valid_move(self, index, newX, newY):
-        if index < 0 or index >= len(self.pieces):
-            # print("Invalid Piece")
-            return False
-        elif newX + self.pieces[index].width > self.numCols or newX < 0 or newY + self.pieces[
-            index].height > self.numRows or newY < 0:
-            # print("Out of bounds")
-            return False
-        else:
-            tmp_piece = deepcopy(self.pieces[index])
-            tmp_piece.col_idx = newX
-            tmp_piece.row_idx = newY
-            occupied_positions = tmp_piece.get_occupied_positions()
-            for piece in self.pieces:
-                if piece.id != tmp_piece.id and any(
-                        map(lambda x: x in occupied_positions, piece.get_occupied_positions())):
-                    # print("Invalid position")
-                    return False
-            return True
-
-    def show_tui(self):
-        representation = [[[] for _ in range(self.numCols)] for _ in range(self.numRows + 1)]
-        for piece in self.pieces:
-            piece.show_tui(representation)
-        for i in range(self.exit_x):
-            representation[self.exit_y][i] = '-'
-        for i in range(self.exit_x + self.exit_width, self.numCols):
-            representation[self.exit_y][i] = '-'
-        return representation
-
-    def drawPieces(self, screen):
-        pieces = []
-
-        piece_objective = ""
-        for piece in self.pieces:
-            if piece.isObjective:
-                piece_objective = piece
-                break
-
-        exit = pygame.draw.rect(screen, GAME_BACKGROUND_COLOR, pygame.Rect(GAME_WIDTH_START + self.wSize * self.exit_x,
-                                                                           GAME_HEIGHT_START + self.hSize * self.exit_y,
-                                                                           piece_objective.width * self.wSize,
-                                                                           piece_objective.width * self.wSize * 0.438547486),
-                                0)
-        exit_image_prepared = pygame.transform.scale(exit_image, (
-            piece_objective.width * self.wSize, piece_objective.width * self.wSize * 0.438547486))
-        screen.blit(exit_image_prepared, exit)
-
-        pygame.draw.rect(screen, (255, 255, 255, 255), pygame.Rect(0,
-                                                                   GAME_HEIGHT_START + self.hSize * self.exit_y + piece_objective.width * self.wSize * 0.10355866,
-                                                                   GAME_WIDTH_START + self.wSize * self.exit_x,
-                                                                   piece_objective.width * self.wSize * 0.08379888), 0)
-
-        pygame.draw.rect(screen, (255, 255, 255, 255),
-                         pygame.Rect(GAME_WIDTH_START + self.wSize * self.exit_x + piece_objective.width * self.wSize,
-                                     GAME_HEIGHT_START + self.hSize * self.exit_y + piece_objective.width * self.wSize * 0.10355866,
-                                     GAME_WIDTH_SIZE - GAME_WIDTH_START + self.wSize * self.exit_x - piece_objective.width * self.wSize,
-                                     piece_objective.width * self.wSize * 0.08379888), 0)
-
-        for piece in self.pieces:
-            pygame.draw.rect(screen, GAME_BACKGROUND_COLOR, pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx,
-                                                                        GAME_HEIGHT_START + self.hSize * piece.row_idx,
-                                                                        self.wSize * piece.width,
-                                                                        self.hSize * piece.height), border_radius=5)
-            texture_load = pygame.image.load(piece.texture)
-            texture_tmp = pygame.transform.scale(texture_load, (
-                self.wSize * piece.width - OFFSET * 2, self.hSize * piece.height - OFFSET * 2))
-            if self.animation != 0 and piece.id == self.movedPiece[0]:
-                tmpCol = self.movedPiece[1]
-                tmpRow = self.movedPiece[2]
-
-                pieceDraw = pygame.draw.rect(screen, piece.color,
-                                             pygame.Rect(GAME_WIDTH_START + tmpCol + OFFSET,
-                                                         GAME_HEIGHT_START + tmpRow + OFFSET,
-                                                         self.wSize * piece.width - OFFSET * 2,
-                                                         self.hSize * piece.height - OFFSET * 2), 0)
-
-                screen.blit(texture_tmp, pieceDraw)
-                self.movedPiece[1] += self.movedPiece[3]
-                self.movedPiece[2] += self.movedPiece[4]
-                self.animation -= 1
-
-            else:
-                pieceDraw = pygame.draw.rect(screen, piece.color,
-                                             pygame.Rect(GAME_WIDTH_START + self.wSize * piece.col_idx + OFFSET,
-                                                         GAME_HEIGHT_START + self.hSize * piece.row_idx + OFFSET,
-                                                         self.wSize * piece.width - OFFSET * 2,
-                                                         self.hSize * piece.height - OFFSET * 2), border_radius=5)
-                screen.blit(texture_tmp, pieceDraw)
-            pieces.append(pieceDraw)
-        return pieces
-
-
-def easy_map():
-    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
-              Piece(2, 1, 2, 1, BLUE), Piece(2, 2, 2, 2, RED, True), Piece(1, 1, 4, 0, YELLOW),
-              Piece(1, 1, 4, 1, YELLOW), Piece(1, 1, 4, 2, YELLOW), Piece(1, 1, 4, 3, YELLOW)]
-
-    puzzle = Puzzle(5, 4, pieces)
-
-    return puzzle
-
-
-def hard_map():
-    pieces = [Piece(1, 2, 0, 0, GREEN), Piece(1, 1, 0, 2, YELLOW), Piece(2, 1, 0, 3, BLUE),
-              Piece(1, 1, 1, 0, YELLOW), Piece(2, 2, 1, 1, RED, True), Piece(2, 1, 2, 3, BLUE),
-              Piece(2, 1, 3, 0, BLUE), Piece(1, 1, 3, 1, YELLOW), Piece(2, 1, 3, 2, BLUE), Piece(1, 1, 2, 0, YELLOW)]
-
-    puzzle = Puzzle(5, 4, pieces)
-
-    return puzzle
-
-
-def medium_map():
-    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(1, 1, 0, 3, YELLOW), Piece(1, 1, 0, 2, YELLOW),
-              Piece(2, 2, 2, 0, RED, True), Piece(2, 1, 1, 2, BLUE), Piece(2, 1, 1, 3, BLUE),
-              Piece(2, 1, 3, 2, BLUE), Piece(1, 1, 3, 3, YELLOW), Piece(1, 1, 4, 1, YELLOW)]
-
-    puzzle = Puzzle(5, 4, pieces)
-
-    return puzzle
-
-
-# distance red block to exit
-def h1(puzzle, _):
-    # Distance from the red block to the exit.
-
-    vector = (puzzle.objectivePiece.col_idx - puzzle.exit_x,
-              puzzle.objectivePiece.row_idx - (puzzle.exit_x + puzzle.exit_width))
-    return math.sqrt(vector[0] * vector[0] + vector[1] * vector[1])
-
-
-def h3(puzzle, _):
-    # The largest contiguous empty space near the red block.
-    matrix = puzzle.show_tui()
-    rows, cols = len(matrix), len(matrix[0])
-
-    def dfs(row, col):
-        if row < 0 or row >= rows - 1 or col < 0 or col >= cols - 1:
-            return 0
-
-        if matrix[row][col]:
-            return 0
-
-        size = 1 + dfs(row + 1, col) + dfs(row, col + 1)
-
-        return size
-
-    max = 0
-    for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
-            tmp = dfs(i, j)
-            if max < tmp:
-                max = tmp
-
-    return -max
-
-
-def h2(puzzle, _):
-    # weighted sum of the number of obstacles between the red block and the exit
-    path = []
-
-    weight = 0
-    piece = puzzle.objectivePiece
-    for i in range(piece.width):
-        for j in range(puzzle.numRows - piece.row_idx):
-            path.append((piece.col_idx + i, piece.row_idx + j))
-    for piece in puzzle.pieces:
-        if not piece.isObjective:
-            if (piece.col_idx, piece.row_idx) in path:
-                weight += (piece.width ** 2) * piece.height
-
-    return weight
-
-
-def h4(puzzle, _):
-    # H4: Prioritize moves that keep the red block close to the edges of the game board.
-    return max(puzzle.objectivePiece.col_idx,
-               puzzle.numCols - puzzle.objectivePiece.width - puzzle.objectivePiece.col_idx) * 100
-
-
-def h5(puzzle, _):
-    # Always ensure that the red block has at least one valid move option available.
-    index = 0
-    for i, piece in enumerate(puzzle.pieces):
-        if piece.isObjective:
-            index = i
-            break
-    vectors = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-
-    weight = 0
-    for (x, y) in vectors:
-        if puzzle.is_valid_move(index, puzzle.pieces[index].col_idx + x, puzzle.pieces[index].row_idx + y):
-            weight += 1
-    return -weight
-
-
-def h6(puzzle, _):
-    # prioritize fitting pieces along the edges of the game board from largest to smallest
-    score = 0
-    for piece in puzzle.pieces:
-        if not piece.isObjective:
-            score += max(piece.col_idx, puzzle.numCols - piece.width - piece.col_idx) * piece.width * piece.height
-    return -score
-
-
-def h7(puzzle, index):
-    # prioritize moving the largest pieces first
-    if index is not None:
-        return puzzle.pieces[index].width * puzzle.pieces[index].height
-    return 0
-
-def h8(puzzle, index):
-    # prioritize moving the smallest pieces first
-    return -h7(puzzle, index)
-
-
-def movedPiece(puzzle1, puzzle2):
-    for i in range(len(puzzle1.pieces)):
-        if puzzle1.pieces[i] != puzzle2.pieces[i]:
-            return puzzle1.pieces[i]
-    return None
-
-
-def move_piece_ai(puzzle, index, newX, newY):
-    if puzzle.is_valid_move(index, newX, newY):
-        res = deepcopy(puzzle)
-        res.pieces[index].col_idx = newX
-        res.pieces[index].row_idx = newY
-        res.moves += 1
-        return res
-    return None
-
-
-def get_child_states(puzzle):
-    vectors = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-    res = []
-    for i, piece in enumerate(puzzle.pieces):
-        for (x, y) in vectors:
-            new_puzzle = move_piece_ai(puzzle, i, piece.col_idx + x, piece.row_idx + y)
-            if new_puzzle:
-                res.append(new_puzzle)
-    return res
-
-
-def gameOver(puzzle):
-    heightRule = puzzle.objectivePiece.row_idx == puzzle.numRows - puzzle.objectivePiece.height
-    widthRule = puzzle.objectivePiece.col_idx >= puzzle.exit_x and puzzle.objectivePiece.col_idx + puzzle.objectivePiece.width <= puzzle.exit_x + puzzle.exit_width
-    puzzle.isGameOver = puzzle.objectivePiece is not None and heightRule and widthRule
-    return puzzle.isGameOver
-
+from time import sleep
+
+'''
+This code implements the main game loop for a sliding puzzle game. 
+The game can be played either by a human or by a computer using different algorithms, 
+including uninformed (BFS, DFS and Iterative Deepening) and informed search algorithms 
+(Greedy, A* and Weighted A*).
+'''
+def main_loop():
+    screen = pygame_init()
+    last_col = None
+    last_row = None
+    moving_piece_index = None
+    hint_rect = None
+    puzzle = analysis.medium_map()
+    game_state = 'main_menu'
+    first_click = True
+    path = None
+    algo = None
+    informed = None
+    heuristic = None
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
+            if game_state == 'main_menu':
+                draw_start_menu(screen)
+
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_c]:
+                    game_state = 'choose_diff_computer'
+                    game_over = False
+                if keys[pygame.K_SPACE]:
+                    game_state = 'choose_diff_human'
+                    game_over = False
+
+            if game_state == 'choose_diff_human':
+                draw_difficulties(screen)
+
+                keys = pygame.key.get_pressed()
+                # Change when more levels are implemented
+                if keys[pygame.K_1]:
+                    game_state = 'playing_human'
+                    puzzle = analysis.easy_map()
+                elif keys[pygame.K_2]:
+                    puzzle = analysis.medium_map()
+                    game_state = 'playing_human'
+                elif keys[pygame.K_3]:
+                    puzzle = analysis.hard_map()
+                    game_state = 'playing_human'
+
+            elif game_state == "choose_diff_computer":
+                draw_difficulties(screen)
+
+                keys = pygame.key.get_pressed()
+                # Change when more levels are implemented
+                if keys[pygame.K_1]:
+                    game_state = 'choose_algo'
+                    puzzle = analysis.easy_map()
+                elif keys[pygame.K_2]:
+                    puzzle = analysis.medium_map()
+                    game_state = 'choose_algo'
+                elif keys[pygame.K_3]:
+                    puzzle = analysis.hard_map()
+                    game_state = 'choose_algo'
+
+            elif game_state == "choose_algo":
+                draw_algos(screen)
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        game_state = 'playing_computer'
+                        informed = False
+                        algo = analysis.breadth_first_search
+                    elif event.key == pygame.K_2:
+                        game_state = 'playing_computer'
+                        informed = False
+                        algo = analysis.depth_first_search
+                    elif event.key == pygame.K_3:
+                        game_state = 'playing_computer'
+                        informed = False
+                        algo = analysis.iterative_deepening_search
+                    elif event.key == pygame.K_4:
+                        game_state = 'choose_heu'
+                        informed = True
+                        algo = analysis.greedy_search
+                    elif event.key == pygame.K_5:
+                        game_state = 'choose_heu'
+                        informed = True
+                        algo = analysis.a_star_search
+                    elif event.key == pygame.K_6:
+                        game_state = 'choose_heu'
+                        informed = True
+                        algo = analysis.weighted_a_star_search
+
+            elif game_state == "choose_heu":
+                draw_heuristics(screen)
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        game_state = 'playing_computer'
+                        heuristic = analysis.h1
+                    elif event.key == pygame.K_2:
+                        game_state = 'playing_computer'
+                        heuristic = analysis.h2
+                    elif event.key == pygame.K_3:
+                        game_state = 'playing_computer'
+                        heuristic = analysis.h3
+                    elif event.key == pygame.K_4:
+                        game_state = 'playing_computer'
+                        heuristic = analysis.h4
+                    elif event.key == pygame.K_5:
+                        game_state = 'playing_computer'
+                        heuristic = analysis.h5
+                    elif event.key == pygame.K_6:
+                        game_state = 'playing_computer'
+                        heuristic = analysis.h6
+                    elif event.key == pygame.K_7:
+                        game_state = 'playing_computer'
+                        heuristic = analysis.h7
+                    elif event.key == pygame.K_8:
+                        game_state = 'playing_computer'
+                        heuristic = analysis.h8
+            elif game_state == "playing_computer":
+                if not informed:
+                    sol = algo(puzzle, analysis.gameOver, analysis.get_child_states)
+                else:
+                    sol = algo(puzzle, analysis.gameOver, analysis.get_child_states, heuristic)
+                path = analysis.get_solution_path(sol[0])
+                show_ai_path(path)
+
+                game_state = "main_menu"
+
+            elif game_state == 'playing_human':
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == pygame.BUTTON_LEFT:
+                        start_pos = pygame.mouse.get_pos()
+                        if hint_rect.collidepoint(start_pos):
+                            if first_click:
+                                sol = analysis.weighted_a_star_search(puzzle, analysis.gameOver, analysis.get_child_states, analysis.h4)
+                                path = analysis.get_solution_path(sol[0])
+                                analysis.movedPiece(path[0], path[1]).toggle_highlight()
+                                first_click = False
+
+                            else:
+                                if analysis.gameOver(path[1]):
+                                    puzzle.move_piece_delta(puzzle.objectivePiece.id, 0, 3)
+                                    game_state = "end_screen"
+                                else:
+                                    puzzle = path[1]
+                                path = None
+                                first_click = True
+
+                        last_col = puzzle.getColIndex(start_pos[0])
+                        last_row = puzzle.getRowIndex(start_pos[1])
+                        tmp = [idx for idx, piece in enumerate(pieces) if is_colliding(piece, start_pos)]
+                        if len(tmp) == 1:
+                            moving_piece_index = tmp[0]
+                            if not first_click:
+                                puzzle.getPiece(moving_piece_index).toggle_highlight(True)
+                            else:
+                                puzzle.getPiece(moving_piece_index).toggle_highlight()
+                            path = None
+                            first_click = True
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == pygame.BUTTON_LEFT:
+                        if moving_piece_index is None:
+                            continue
+                        end_pos = pygame.mouse.get_pos()
+
+                        new_col = puzzle.getColIndex(end_pos[0])
+                        new_row = puzzle.getRowIndex(end_pos[1])
+                        puzzle.move_piece_delta(moving_piece_index, new_col - last_col, new_row - last_row)
+                        puzzle.getPiece(moving_piece_index).toggle_highlight()
+                        start_pos = None
+                        if analysis.gameOver(puzzle):
+                            puzzle.move_piece_delta(moving_piece_index, 0, 3)
+                            game_state = "end_screen"
+                        moving_piece_index = None
+
+                if moving_piece_index is not None:
+                    current_pos = pygame.mouse.get_pos()
+
+                    new_col = puzzle.getColIndex(current_pos[0])
+                    new_row = puzzle.getRowIndex(current_pos[1])
+                    delta_col = new_col - last_col
+                    delta_row = new_row - last_row
+                    puzzle.move_piece_delta(moving_piece_index, delta_col, delta_row)
+                    last_col += delta_col
+                    last_row += delta_row
+
+                screen.fill(analysis.BG_COLOR)
+                pygame.draw.rect(screen, analysis.GAME_BACKGROUND_COLOR,
+                                 pygame.Rect(analysis.GAME_WIDTH_START, analysis.GAME_HEIGHT_START, analysis.GAME_WIDTH_SIZE, analysis.GAME_HEIGHT_SIZE),
+                                 border_radius=5)
+                pieces = puzzle.drawPieces(screen)
+                draw_moves(screen, puzzle.getMoves())
+                hint_rect = hint_button(screen)
+                pygame.display.flip()
+                pygame.display.update()
+            elif game_state == 'end_screen':
+                draw_end_screen(screen, puzzle)
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_m]:
+                    game_state = 'main_menu'
+                    last_col = None
+                    last_row = None
+                    moving_piece_index = None
+                    puzzle = analysis.easy_map()
+                    game_over = False
 
 if __name__ == '__main__':
-    uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
-    informed_search = {"Greedy": greedy_search, "A* search": a_star_search,
-                       "Weighted A* search": weighted_a_star_search}
-    heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
-    levels = {'easy': easy_map(), 'medium': medium_map(),'hard': hard_map()}
-    optimal_solutions = dict()
-    statistics = dict()
+    main_loop()
 
-    for level in levels:
-        statistics[level] = {'time': {}, 'nodes': {}, 'iterations': {}, 'relative error': {}}
-
-    for strategy in uninformed_search:
-        for level in levels:
-            start = time.time()
-            if (strategy == 'BFS' and level == 'hard'): pass
-            else:
-                details = uninformed_search[strategy](levels[level], gameOver, get_child_states)
-            end = time.time()
-
-            path = get_solution_path(details[0])
-
-            if strategy == "BFS":
-                optimal_solutions[level] = len(path)
-            if level == 'hard' and strategy == "BFS":
-                statistics[level]['time'][strategy] = 99999
-                statistics[level]['nodes'][strategy] = 99999
-                statistics[level]['iterations'][strategy] = 99999
-                statistics[level]['relative error'][strategy] = 0
-            else:
-                statistics[level]['time'][strategy] = end - start
-                statistics[level]['nodes'][strategy] = details[1]
-                statistics[level]['iterations'][strategy] = details[2]
-                statistics[level]['relative error'][strategy] = (abs(len(path) - optimal_solutions[level]) /
-                                                                 optimal_solutions[
-                                                                     level]) * 100
-
-    statistics_informed = dict()
-    for level in levels:
-        statistics_informed[level] = {'time': {algo_name: {} for algo_name in informed_search.keys()},
-                                      'nodes': {algo_name: {} for algo_name in informed_search.keys()},
-                                      'iterations': {algo_name: {} for algo_name in informed_search.keys()},
-                                      'relative error': {algo_name: {} for algo_name in informed_search.keys()}}
-    for strategy in informed_search:
-        for level in levels:
-            for heuristic in heuristics:
-                start = time.time()
-                # [node, len(visited) + puzzles_in_memory, iterations]
-                details = informed_search[strategy](levels[level], gameOver, get_child_states, heuristics[heuristic])
-                end = time.time()
-
-                path = get_solution_path(details[0])
-                if not statistics_informed[level]['time'][strategy]:
-                    statistics_informed[level]['time'][strategy] = {}
-                    statistics_informed[level]['nodes'][strategy] = {}
-                    statistics_informed[level]['iterations'][strategy] = {}
-                    statistics_informed[level]['relative error'][strategy] = {}
-
-                statistics_informed[level]['time'][strategy][heuristic] = end - start
-                statistics_informed[level]['nodes'][strategy][heuristic] = details[1]
-                statistics_informed[level]['iterations'][strategy][heuristic] = details[2]
-                statistics_informed[level]['relative error'][strategy][heuristic] = ((len(path) - optimal_solutions[
-                    level]) /
-                                                                                     optimal_solutions[level]) * 100
-
-    app = show_data_web.show_data(statistics, statistics_informed)
-    app.run()

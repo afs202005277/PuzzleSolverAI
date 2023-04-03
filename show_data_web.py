@@ -2,7 +2,20 @@ import dash
 from dash import dcc, html
 import plotly.graph_objs as go
 
+"""
+The function show_data() takes two dictionaries as inputs: algorithms and heuristics, and uses them to create a dashboard using the Dash framework. 
+The dashboard displays the results of running various search algorithms and heuristics on different levels of a game.
 
+The algorithms dictionary has keys for different levels of the game and values that are themselves dictionaries. 
+These sub-dictionaries have keys for different measures (such as "time" or "nodes") and values that are dictionaries mapping algorithm names to the corresponding measure value.
+
+The heuristics dictionary has similar structure, but with keys for different levels, measures, and algorithms, and values that are dictionaries mapping heuristic names to the corresponding measure value.
+
+The function creates a separate bar chart for each level and measure in the algorithms dictionary, and a separate bar chart for each level, measure, and algorithm in the heuristics dictionary. 
+The x-axis of each chart shows the algorithms or heuristics being compared, and the y-axis shows the corresponding measure value.
+
+The function returns the constructed dashboard as a Dash object.
+"""
 def show_data(algorithms, heuristics):
     app = dash.Dash()
 
