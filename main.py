@@ -1,9 +1,5 @@
 from time import sleep
 
-import pygame
-import analysis
-from view import *
-
 '''
 This code implements the main game loop for a sliding puzzle game. 
 The game can be played either by a human or by a computer using different algorithms, 
@@ -221,3 +217,4 @@ def main_loop():
 
 if __name__ == '__main__':
     main_loop()
+
