@@ -337,9 +337,9 @@ def medium_map():
 
 # Creates the hard map
 def hard_map():
-    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 2, 0, 1, RED, True), Piece(2, 1, 0, 3, BLUE), Piece(2, 1, 2, 0, BLUE),
-              Piece(1, 1, 2, 1, YELLOW), Piece(1, 1, 3, 1, YELLOW), Piece(1, 1, 3, 2, YELLOW),
-              Piece(1, 1, 2, 2, YELLOW), Piece(2, 1, 2, 3, BLUE), Piece(1, 2, 4, 1, GREEN)]
+    pieces = [Piece(1, 2, 0, 0, GREEN), Piece(1, 1, 0, 2, YELLOW), Piece(2, 1, 0, 3, BLUE),
+              Piece(1, 1, 1, 0, YELLOW), Piece(2, 2, 1, 1, RED, True), Piece(2, 1, 2, 3, BLUE),
+              Piece(2, 1, 3, 0, BLUE), Piece(1, 1, 3, 1, YELLOW), Piece(2, 1, 3, 2, BLUE), Piece(1, 1, 2, 0, YELLOW)]
 
     puzzle = Puzzle(5, 4, pieces)
 

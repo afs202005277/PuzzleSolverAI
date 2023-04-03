@@ -27,8 +27,8 @@ if __name__ == '__main__':
     uninformed_search = {"BFS": breadth_first_search, "DFS": depth_first_search, "IDS": iterative_deepening_search}
     informed_search = {"Greedy": greedy_search, "A* search": a_star_search,
                        "Weighted A* search": weighted_a_star_search}
-    heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7, "h8": h8}
-    levels = {'easy': easy_map(), "medium": medium_map(), "hard": hard_map()}
+    heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7}
+    levels = {'easy': easy_map(), 'medium': medium_map(), 'hard': hard_map()}
     optimal_solutions = dict()
     statistics = dict()
 
@@ -37,23 +37,34 @@ if __name__ == '__main__':
 
     for strategy in uninformed_search:
         for level in levels:
+            print('here1')
             start = time.time()
-            details = uninformed_search[strategy](levels[level], gameOver, get_child_states)
+            if (strategy == 'BFS' and level == 'hard'):
+                details = a_star_search(levels[level], gameOver, get_child_states, h4)
+            else:
+                details = uninformed_search[strategy](levels[level], gameOver, get_child_states)
             end = time.time()
 
             path = get_solution_path(details[0])
 
             if strategy == "BFS":
                 optimal_solutions[level] = len(path)
-            statistics[level]['time'][strategy] = end - start
-            statistics[level]['nodes'][strategy] = details[1]
-            statistics[level]['iterations'][strategy] = details[2]
-            statistics[level]['relative error'][strategy] = (abs(len(path) - optimal_solutions[level]) /
-                                                             optimal_solutions[
-                                                                 level]) * 100
+            if level == 'hard' and strategy == "BFS":
+                statistics[level]['time'][strategy] = 99999
+                statistics[level]['nodes'][strategy] = 99999
+                statistics[level]['iterations'][strategy] = 99999
+                statistics[level]['relative error'][strategy] = 0
+            else:
+                statistics[level]['time'][strategy] = end - start
+                statistics[level]['nodes'][strategy] = details[1]
+                statistics[level]['iterations'][strategy] = details[2]
+                statistics[level]['relative error'][strategy] = (abs(len(path) - optimal_solutions[level]) /
+                                                                 optimal_solutions[
+                                                                     level]) * 100
 
     statistics_informed = dict()
     for level in levels:
+        print('here2')
         statistics_informed[level] = {'time': {algo_name: {} for algo_name in informed_search.keys()},
                                       'nodes': {algo_name: {} for algo_name in informed_search.keys()},
                                       'iterations': {algo_name: {} for algo_name in informed_search.keys()},
@@ -79,6 +90,5 @@ if __name__ == '__main__':
                 statistics_informed[level]['relative error'][strategy][heuristic] = ((len(path) - optimal_solutions[
                     level]) /
                                                                                      optimal_solutions[level]) * 100
-
     app = show_data_web.show_data(statistics, statistics_informed)
     app.run()
