@@ -28,7 +28,7 @@ if __name__ == '__main__':
     informed_search = {"Greedy": greedy_search, "A* search": a_star_search,
                        "Weighted A* search": weighted_a_star_search}
     heuristics = {"h1": h1, "h2": h2, "h3": h3, "h4": h4, "h5": h5, "h6": h6, "h7": h7, "h8": h8}
-    levels = {'easy': easy_map(), 'medium': medium_map()}
+    levels = {'easy': easy_map(), 'medium': medium_map(), 'hard': hard_map()}
     optimal_solutions = dict()
     statistics = dict()
 
