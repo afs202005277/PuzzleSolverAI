@@ -326,9 +326,9 @@ def easy_map():
 
 # Creates the medium map
 def medium_map():
-    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(1, 1, 0, 3, YELLOW), Piece(1, 1, 0, 2, YELLOW),
-              Piece(2, 2, 2, 0, RED, True), Piece(2, 1, 1, 2, BLUE), Piece(2, 1, 1, 3, BLUE),
-              Piece(2, 1, 3, 2, BLUE), Piece(1, 1, 3, 3, YELLOW), Piece(1, 1, 4, 1, YELLOW)]
+    pieces = [Piece(1, 2, 0, 0, GREEN), Piece(1, 2, 0, 2, GREEN), Piece(2, 1, 1, 0, BLUE), Piece(1, 1, 1, 1, YELLOW),
+              Piece(1, 1, 2, 1, YELLOW), Piece(2, 2, 1, 2, RED, True), Piece(2, 1, 3, 0, BLUE), Piece(1, 1, 3, 1, YELLOW),
+              Piece(1, 1, 3, 2, YELLOW), Piece(1, 1, 3, 3, YELLOW), Piece(1, 1, 4, 3, YELLOW)]
 
     puzzle = Puzzle(5, 4, pieces)
 
@@ -337,9 +337,9 @@ def medium_map():
 
 # Creates the hard map
 def hard_map():
-    pieces = [Piece(1, 2, 0, 0, GREEN), Piece(1, 1, 0, 2, YELLOW), Piece(2, 1, 0, 3, BLUE),
-              Piece(1, 1, 1, 0, YELLOW), Piece(2, 2, 1, 1, RED, True), Piece(2, 1, 2, 3, BLUE),
-              Piece(2, 1, 3, 0, BLUE), Piece(1, 1, 3, 1, YELLOW), Piece(2, 1, 3, 2, BLUE), Piece(1, 1, 2, 0, YELLOW)]
+    pieces = [Piece(2, 1, 0, 0, BLUE), Piece(2, 1, 0, 1, BLUE), Piece(1, 1, 0, 3, YELLOW), Piece(1, 1, 0, 2, YELLOW),
+              Piece(2, 2, 2, 0, RED, True), Piece(2, 1, 1, 2, BLUE), Piece(2, 1, 1, 3, BLUE),
+              Piece(2, 1, 3, 2, BLUE), Piece(1, 1, 3, 3, YELLOW), Piece(1, 1, 4, 1, YELLOW)]
 
     puzzle = Puzzle(5, 4, pieces)
 
