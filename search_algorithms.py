@@ -148,17 +148,18 @@ The search algorithm proceeds by adding the new child nodes to the queue and mar
 
 def depth_limited_search(initial_state, goal_state_func, operators_func, depth_limit):
     root = TreeNode(initial_state)  # create the root node in the search tree
-    queue = [root]  # initialize the queue to store the nodes
+    root.depth = 0
+    queue = deque([root])  # initialize the queue to store the nodes
     visited = set()
     iterations = 0
     puzzles_in_memory = 0
     while queue:
         iterations += 1
-        node = queue.pop()  # get first element in the queue
+        node = queue.popleft()  # get first element in the queue
         if goal_state_func(node.state):  # check goal state
             return [node, len(visited) + puzzles_in_memory, iterations]
 
-        if node.depth < depth_limit:
+        if node.depth <= depth_limit:
             for state in operators_func(node.state):  # go through next states
                 if state not in visited:
                     child = TreeNode(state, node)
