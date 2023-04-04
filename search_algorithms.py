@@ -162,7 +162,7 @@ def depth_limited_search(initial_state, goal_state_func, operators_func, depth_l
             for state in operators_func(node.state):  # go through next states
                 if state not in visited:
                     child = TreeNode(state, node)
-
+                    child.depth = node.depth + 1
                     node.add_child(child)
                     puzzles_in_memory += 1
                     queue.append(child)
